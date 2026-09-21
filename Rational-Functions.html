@@ -1,0 +1,1731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rational Functions: Intuitive Playground & Simulator</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- KaTeX for formula rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              900: '#0c4a6e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .eli6-font {
+      font-family: 'Fredoka', cursive, sans-serif;
+    }
+    .math-font {
+      font-family: 'Fira Code', monospace;
+    }
+    .grid-canvas-bg {
+      background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+    }
+    input[type=range] {
+      accent-color: #38bdf8;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090d16;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-sky-500 selection:text-white">
+
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 via-indigo-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-sky-500/20">
+          <span class="text-lg font-black text-white math-font">$\frac{P}{Q}$</span>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg font-bold bg-gradient-to-r from-sky-400 via-teal-300 to-indigo-400 bg-clip-text text-transparent">
+              Rational Functions: Cambridge 9231 FP1
+            </h1>
+            <div class="inline-flex p-0.5 rounded-lg bg-slate-950 border border-slate-800 text-[11px] font-semibold">
+              <button id="btn-mode-eli6" onclick="setAppMode('eli6')" class="px-2.5 py-0.5 rounded-md transition bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                <span>👶</span> ELI6 Mode
+              </button>
+              <button id="btn-mode-exam" onclick="setAppMode('exam')" class="px-2.5 py-0.5 rounded-md transition text-slate-400 hover:text-slate-200 flex items-center gap-1">
+                <span>🎓</span> Exam 9231 Mode
+              </button>
+            </div>
+          </div>
+          <p id="header-subtitle" class="text-xs text-slate-400">Mastering Asymptotes, Oblique Slants, Discriminant Ranges & Graph Transforms</p>
+        </div>
+      </div>
+
+      <!-- Mode Selector Tabs -->
+      <nav class="flex items-center bg-slate-950/80 p-1 rounded-xl border border-slate-800 text-xs sm:text-sm">
+        <button onclick="switchTab('tab-asymptotes')" id="btn-tab-asymptotes" class="tab-btn px-3 py-1.5 rounded-lg font-medium transition-all bg-sky-500 text-slate-950 shadow-md font-semibold">
+          ⚡ 1. Asymptote Architect
+        </button>
+        <button onclick="switchTab('tab-oblique')" id="btn-tab-oblique" class="tab-btn px-3 py-1.5 rounded-lg font-medium transition-all text-slate-400 hover:text-white">
+          📐 2. Oblique Slant & $\lambda$
+        </button>
+        <button onclick="switchTab('tab-range')" id="btn-tab-range" class="tab-btn px-3 py-1.5 rounded-lg font-medium transition-all text-slate-400 hover:text-white">
+          🚫 3. Range & Discriminant
+        </button>
+        <button onclick="switchTab('tab-transforms')" id="btn-tab-transforms" class="tab-btn px-3 py-1.5 rounded-lg font-medium transition-all text-slate-400 hover:text-white">
+          🪄 4. Graph Transforms
+        </button>
+        <button onclick="switchTab('tab-challenges')" id="btn-tab-challenges" class="tab-btn px-3 py-1.5 rounded-lg font-medium transition-all text-slate-400 hover:text-white">
+          📖 5. Exam Challenges
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-6 flex-1 flex flex-col gap-6 w-full">
+
+    <!-- TAB 1: ASYMPTOTE ARCHITECT (VERTICAL & HORIZONTAL) -->
+    <section id="tab-asymptotes" class="tab-panel flex flex-col lg:flex-row gap-6">
+      <!-- Left Interactive Canvas Area -->
+      <div class="lg:w-7/12 flex flex-col gap-3">
+        <div class="relative rounded-2xl border border-slate-800 overflow-hidden shadow-2xl grid-canvas-bg">
+          <canvas id="canvas-asymptotes" class="w-full h-[440px] cursor-crosshair block"></canvas>
+          
+          <!-- Live Floating Indicators -->
+          <div class="absolute top-3 left-3 bg-slate-900/90 backdrop-blur border border-slate-700/60 rounded-xl px-3 py-2 text-xs flex flex-wrap items-center gap-4">
+            <div>
+              <span class="text-slate-400 block text-[10px] uppercase tracking-wider">Active Curve:</span>
+              <span id="asymptote-func-label" class="font-bold text-sky-400 text-sm math-font">y = (x+3)/(x+2)</span>
+            </div>
+            <div class="border-l border-slate-700 pl-4">
+              <span class="text-slate-400 block text-[10px] uppercase tracking-wider">Vertical Asymptotes ($Q=0$):</span>
+              <span id="asymptote-vert-label" class="font-bold text-rose-400 text-xs math-font">x = -2</span>
+            </div>
+            <div class="border-l border-slate-700 pl-4">
+              <span class="text-slate-400 block text-[10px] uppercase tracking-wider">Horizontal Asymptote ($x \to \infty$):</span>
+              <span id="asymptote-horiz-label" class="font-bold text-amber-400 text-xs math-font">y = 1</span>
+            </div>
+          </div>
+
+          <!-- Interaction Hint -->
+          <div class="absolute bottom-3 right-3 bg-slate-900/80 text-slate-300 text-[11px] px-2.5 py-1 rounded-lg border border-slate-700/50 pointer-events-none">
+            🖱️ Move mouse across the canvas to inspect coordinates and limits!
+          </div>
+        </div>
+
+        <div class="bg-slate-900/70 p-3 rounded-xl border border-slate-800 flex flex-wrap gap-2 text-xs">
+          <button onclick="setAsymptotePreset('linear')" id="btn-pre-linear" class="asymptote-pre-btn px-3 py-1.5 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-500/50 font-medium transition">
+            📘 Worked Ex 2.1: $\frac{x+3}{x+2}$
+          </button>
+          <button onclick="setAsymptotePreset('two-poles')" id="btn-pre-twopoles" class="asymptote-pre-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition">
+            📙 Page 20: $\frac{1}{(x-1)(x-2)}$
+          </button>
+          <button onclick="setAsymptotePreset('cross-asymptote')" id="btn-pre-cross" class="asymptote-pre-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition">
+            📗 Worked Ex 2.2: $\frac{x}{(x+1)(x-3)}$
+          </button>
+          <button onclick="setAsymptotePreset('quad-over-quad')" id="btn-pre-quadquad" class="asymptote-pre-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition">
+            ⚡ Worked Ex 2.3: $\frac{(x-1)(x-2)}{(2x-1)(x+1)}$
+          </button>
+        </div>
+
+        <!-- Controls Toolbar -->
+        <div class="bg-slate-900/70 p-4 rounded-xl border border-slate-800 flex flex-col sm:flex-row gap-4 justify-between items-center text-xs">
+          <div class="flex items-center gap-2 flex-wrap">
+            <!-- Snap Toggle -->
+            <button id="btn-toggle-snap" onclick="toggleCoordinateSnap()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-200 border border-slate-700 transition flex items-center gap-1.5 font-medium">
+              <span id="snap-icon">🧲</span>
+              <span id="snap-label">Snap: OFF</span>
+            </button>
+
+            <!-- Zoom / Reset -->
+            <button onclick="resetAsymptoteView()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 border border-slate-700 transition">
+              ↺ Reset View
+            </button>
+          </div>
+
+          <!-- Live Mouse Coordinates -->
+          <div class="flex items-center gap-2 text-slate-400">
+            <span>Pointer:</span>
+            <span id="asymptote-mouse-coord" class="font-mono text-sky-300 font-bold text-xs">(0.00, 0.00)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:w-5/12 flex flex-col gap-4">
+        <!-- ELI6 Card -->
+        <div id="card-asymptote-eli6" class="mode-view-eli6 bg-gradient-to-br from-sky-950/40 via-slate-900 to-slate-900 p-5 rounded-2xl border border-sky-500/30">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-2xl">⚡</span>
+            <h3 class="text-lg font-bold text-sky-300 eli6-font tracking-wide">ELI6: The Electric Fence & The Sky Ceiling</h3>
+          </div>
+          <div class="text-sm text-slate-300 space-y-2 leading-relaxed">
+            <p>
+              Imagine you are on a runaway train riding a math track!
+            </p>
+            <ul class="list-disc pl-5 space-y-1.5 text-xs">
+              <li>
+                <strong>The Red Electric Fence (Vertical Asymptote):</strong> 
+                You cannot divide a pizza by zero slices! Whenever the bottom number of the fraction becomes $0$, an invisible electric fence appears. As the train gets closer, it screams and shoots up to the stars ($+\infty$) or plunges into the underworld ($-\infty$), but it can <em>never</em> touch the fence!
+              </li>
+              <li>
+                <strong>The Amber Horizon (Horizontal Asymptote):</strong>
+                When you walk super far away to the right ($x = +1,000,000$) or left, tiny numbers don't matter anymore. The track settles down on a flat highway at height $y = 1$!
+              </li>
+              <li>
+                <strong>The Sneaky Bridge Crossing:</strong>
+                Can a curve cross its asymptote? <em>YES!</em> A curve can cross its horizontal asymptote in the middle (like Worked Example 2.2 passing through $(0,0)$), but it can <em>never</em> cross a vertical fence because division by zero is forbidden!
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Exam 9231 Card -->
+        <div id="card-asymptote-exam" class="mode-view-exam hidden bg-gradient-to-br from-indigo-950/40 via-slate-900 to-slate-900 p-5 rounded-2xl border border-indigo-500/40">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">🎓</span>
+              <h3 class="text-base font-bold text-indigo-300 tracking-wide">Cambridge 9231 Specification: Section 2.1</h3>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono">Paper 1 Core</span>
+          </div>
+
+          <div class="text-xs text-slate-300 space-y-2.5 leading-relaxed">
+            <div class="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800">
+              <span class="text-amber-300 font-semibold block mb-1">Standard Asymptote Conditions:</span>
+              $$\text{Vertical: } Q(x) = 0 \quad \text{Horizontal: } y = \lim_{|x| \to \infty} \frac{P(x)}{Q(x)}$$
+            </div>
+
+            <div class="space-y-1 text-[11px]">
+              <span class="font-semibold text-indigo-400 flex items-center gap-1.5">
+                <span>⚠️</span> Cambridge Examiner Marking Rules:
+              </span>
+              <ul class="list-disc pl-4 space-y-1 text-slate-300">
+                <li><strong>Sign Tests Around Discontinuities:</strong> Check $x = c \pm 0.0001$ to verify which side diverges to $+\infty$ vs $-\infty$.</li>
+                <li><strong>Intersections with Horizontal Asymptote:</strong> Set $\frac{P(x)}{Q(x)} = y_{\text{asymptote}}$ and solve for finite $x$.</li>
+                <li><strong>Axial Intersections:</strong> Explicitly state $(0, f(0))$ and roots where $P(x) = 0$.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Analytic Breakdown Card -->
+        <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 text-xs space-y-3">
+          <div class="flex items-center justify-between text-sky-400 font-bold uppercase tracking-wider text-[11px]">
+            <span>Live Intercepts & Limit Analysis</span>
+            <span id="asymptote-status-tag" class="text-[10px] text-slate-400 font-mono">analysis</span>
+          </div>
+          <div id="asymptote-details-box" class="text-slate-300 text-xs leading-relaxed space-y-1.5 math-font">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-oblique" class="tab-panel hidden flex flex-col lg:flex-row gap-6">
+      <div class="lg:w-7/12 flex flex-col gap-3">
+        <div class="relative rounded-2xl border border-slate-800 overflow-hidden shadow-2xl grid-canvas-bg">
+          <canvas id="canvas-oblique" class="w-full h-[440px] block"></canvas>
+          
+          <!-- Status Overlay -->
+          <div class="absolute top-3 left-3 bg-slate-900/85 backdrop-blur border border-slate-700/60 rounded-xl px-3 py-2 text-xs flex flex-wrap items-center gap-4">
+            <div>
+              <span class="text-slate-400 block text-[10px] uppercase">Oblique Asymptote ($y = Ax + B$):</span>
+              <span id="oblique-line-badge" class="font-bold text-pink-400 text-sm math-font">y = x + 2</span>
+            </div>
+            <div class="border-l border-slate-700 pl-4">
+              <span class="text-slate-400 block text-[10px] uppercase">Turning Points:</span>
+              <span id="oblique-tp-badge" class="font-bold text-emerald-400 text-sm math-font">2 Turning Points</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preset Buttons for Oblique Tab -->
+        <div class="bg-slate-900/70 p-3 rounded-xl border border-slate-800 flex flex-wrap gap-2 text-xs">
+          <button onclick="setObliquePreset('ex25')" class="oblique-pre-btn px-3 py-1.5 rounded-lg bg-pink-500/20 text-pink-300 border border-pink-500/50 font-medium transition">
+            📘 Worked Ex 2.5: $\frac{x^2+1}{x-2} = x+2+\frac{5}{x-2}$
+          </button>
+          <button onclick="setObliquePreset('ex26')" class="oblique-pre-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition">
+            📙 Worked Ex 2.6: $\frac{x^2-1}{2x-3} = \frac{1}{2}x+\frac{3}{4}+\frac{5/4}{2x-3}$
+          </button>
+          <button onclick="setObliquePreset('ex27')" class="oblique-pre-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition">
+            📗 Worked Ex 2.7: $\frac{x^2-9}{1-x} = -x-1-\frac{8}{1-x}$
+          </button>
+          <button onclick="setObliquePreset('past-paper-lambda')" class="oblique-pre-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition">
+            🎓 June 2009 Past Paper: $\frac{x^2}{x+\lambda}$
+          </button>
+        </div>
+
+        <!-- Interactive Lambda Slider Bar -->
+        <div id="oblique-lambda-toolbar" class="bg-slate-900/70 p-4 rounded-xl border border-slate-800 flex items-center justify-between text-xs">
+          <div class="flex items-center gap-3">
+            <span class="text-slate-300 font-semibold">Past Paper Parameter $\lambda$:</span>
+            <input type="range" id="slider-lambda" min="-4" max="4" step="0.5" value="1.5" class="w-36 sm:w-48">
+            <span id="val-lambda" class="font-mono text-pink-300 font-bold text-sm">1.5</span>
+          </div>
+          <div class="text-[11px] text-slate-400 italic">
+            Watch turning points $(0,0)$ and $(-2\lambda, -4\lambda)$ shift!
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:w-5/12 flex flex-col gap-4">
+        <div class="bg-gradient-to-br from-pink-950/40 via-slate-900 to-slate-900 p-5 rounded-2xl border border-pink-500/30">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-2xl">📐</span>
+            <h3 id="oblique-story-title" class="text-lg font-bold text-pink-300 eli6-font">The Diagonal Ski Slope ($y = Ax + B$)</h3>
+          </div>
+          <div id="oblique-story-body" class="text-sm text-slate-300 space-y-2 leading-relaxed">
+            <p>
+              What happens when the top degree ($x^2$) is higher than the bottom ($x$)?
+            </p>
+            <p>
+              When $x$ grows huge, dividing $x^2$ by $x$ behaves like a tilted line $y = Ax + B$! 
+              By doing polynomial long division, you separate the straight runway from the tiny leftover fraction:
+            </p>
+            <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 text-center font-bold text-pink-300 math-font text-xs">
+              $y = \text{Straight Line Runway } (Ax + B) + \frac{\text{Tiny Remainder } C}{dx + e}$
+            </div>
+            <p class="text-xs text-slate-400">
+              When you fly far away to infinity, the remainder shrinks to zero! The curve hugs the diagonal ski slope!
+            </p>
+          </div>
+        </div>
+
+        <!-- Step-by-step Division Card -->
+        <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 space-y-3">
+          <div class="text-xs font-semibold text-pink-400 uppercase tracking-wider">Exact Algebraic Decomposition:</div>
+          <div id="oblique-algebra-steps" class="space-y-2 text-xs math-font text-slate-300 leading-relaxed"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-range" class="tab-panel hidden flex flex-col lg:flex-row gap-6">
+      <div class="lg:w-7/12 flex flex-col gap-3">
+        <div class="relative rounded-2xl border border-slate-800 overflow-hidden shadow-2xl grid-canvas-bg">
+          <canvas id="canvas-range" class="w-full h-[440px] block"></canvas>
+
+          <!-- Floating Badge -->
+          <div class="absolute top-3 left-3 bg-slate-900/85 backdrop-blur border border-slate-700/60 rounded-xl px-3 py-2 text-xs flex items-center gap-4">
+            <div>
+              <span class="text-slate-400 block text-[10px] uppercase">Discriminant Condition:</span>
+              <span id="range-discr-badge" class="font-bold text-amber-400 text-sm math-font">b² - 4ac < 0</span>
+            </div>
+            <div class="border-l border-slate-700 pl-4">
+              <span class="text-slate-400 block text-[10px] uppercase">Valid Range of $y$:</span>
+              <span id="range-valid-badge" class="font-bold text-emerald-400 text-sm math-font">y ≤ 1 or y ≥ 2</span>
+            </div>
+          </div>
+
+          <!-- Forbidden Zone Overlay Legend -->
+          <div class="absolute bottom-3 right-3 bg-slate-900/80 text-rose-300 text-[11px] px-2.5 py-1 rounded-lg border border-rose-500/40 flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-500/40 border border-rose-400"></span>
+            Shaded Red = Forbidden $y$-Band ($\Delta < 0$)
+          </div>
+        </div>
+
+        <!-- Presets for Tab 3 -->
+        <div class="bg-slate-900/70 p-3 rounded-xl border border-slate-800 flex flex-wrap gap-2 text-xs">
+          <button onclick="setRangePreset('page31')" class="range-pre-btn px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/50 font-medium transition">
+            📘 Page 31: $\frac{x^2+2x-1}{2x-1} \implies y \le 1 \text{ or } y \ge 2$
+          </button>
+          <button onclick="setRangePreset('ex210')" class="range-pre-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition">
+            📙 Worked Ex 2.10: $\frac{x^2-x-2}{x^2-x+5} \implies -\frac{9}{19} \le y < 1$
+          </button>
+          <button onclick="setRangePreset('june2013')" class="range-pre-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition">
+            📗 June 2013 Q10: $\frac{2x^2-3x-2}{x^2-2x+1} \le \frac{25}{12}$
+          </button>
+          <button onclick="setRangePreset('finite-bell')" class="range-pre-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition">
+            ⚡ Bell Curve: $\frac{1}{x^2+3x+6} \implies 0 < y \le \frac{4}{15}$
+          </button>
+        </div>
+      </div>
+
+      <div class="lg:w-5/12 flex flex-col gap-4">
+        <div class="bg-gradient-to-br from-amber-950/40 via-slate-900 to-slate-900 p-5 rounded-2xl border border-amber-500/30">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-2xl">🚫</span>
+            <h3 class="text-lg font-bold text-amber-300 eli6-font">The Forbidden Lava Floor ($b^2 - 4ac < 0$)</h3>
+          </div>
+          <div class="text-sm text-slate-300 space-y-2 leading-relaxed">
+            <p>
+              Did you know you can find highest and lowest peaks <strong>without differentiating</strong>?
+            </p>
+            <p>
+              Imagine asking: <em>"Can this graph ever reach height $y$?"</em>
+              Multiply across to make a quadratic equation in $x$:
+            </p>
+            <div class="p-2 rounded-lg bg-slate-950/80 border border-slate-800 text-center font-bold text-amber-300 math-font text-xs">
+              $A(y) x^2 + B(y) x + C(y) = 0$
+            </div>
+            <p class="text-xs text-slate-300">
+              For real points $x$ to exist, the discriminant must NOT be negative! 
+              Whenever $\Delta = B^2 - 4AC < 0$, that height $y$ is <strong>hot lava</strong>—the curve can never touch it!
+            </p>
+          </div>
+        </div>
+
+        <!-- Range Calculation Details -->
+        <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 space-y-3">
+          <div class="text-xs font-semibold text-amber-400 uppercase tracking-wider">Exact Discriminant Inequality:</div>
+          <div id="range-algebra-box" class="space-y-2 text-xs math-font text-slate-300 leading-relaxed"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-transforms" class="tab-panel hidden flex flex-col lg:flex-row gap-6">
+      <div class="lg:w-7/12 flex flex-col gap-3">
+        <div class="relative rounded-2xl border border-slate-800 overflow-hidden shadow-2xl grid-canvas-bg">
+          <canvas id="canvas-transforms" class="w-full h-[440px] block"></canvas>
+          
+          <div class="absolute top-3 left-3 bg-slate-900/85 backdrop-blur border border-slate-700/60 rounded-xl px-3 py-2 text-xs flex items-center gap-4">
+            <div>
+              <span class="text-slate-400 block text-[10px] uppercase">Active Transformation:</span>
+              <span id="trans-mode-badge" class="font-bold text-cyan-400 text-sm math-font">y = |f(x)| (Absolute Value)</span>
+            </div>
+            <div class="border-l border-slate-700 pl-4">
+              <span class="text-slate-400 block text-[10px] uppercase">Base Function $f(x)$:</span>
+              <span id="trans-base-badge" class="font-bold text-slate-300 text-xs math-font">f(x) = (x²-1)/(2x-3)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transformation Selector Buttons -->
+        <div class="bg-slate-900/70 p-3 rounded-xl border border-slate-800 flex flex-wrap gap-2 text-xs">
+          <button id="btn-tr-orig" onclick="setTransformMode('orig')" class="trans-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition">
+            📈 Original $y = f(x)$
+          </button>
+          <button id="btn-tr-recip" onclick="setTransformMode('recip')" class="trans-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition">
+            🔄 Reciprocal $y = \frac{1}{f(x)}$
+          </button>
+          <button id="btn-tr-absy" onclick="setTransformMode('absy')" class="trans-btn px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 font-medium transition">
+            ✨ Modulus $y = |f(x)|$
+          </button>
+          <button id="btn-tr-absx" onclick="setTransformMode('absx')" class="trans-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition">
+            🦋 Even Mirror $y = f(|x|)$
+          </button>
+          <button id="btn-tr-y2" onclick="setTransformMode('y2')" class="trans-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition">
+            🦅 Twin Wings $y^2 = f(x)$
+          </button>
+        </div>
+
+        <!-- Base Function Switcher -->
+        <div class="bg-slate-900/70 p-3 rounded-xl border border-slate-800 flex items-center justify-between text-xs">
+          <span class="text-slate-300 font-semibold">Select Base Curve $f(x)$:</span>
+          <div class="flex gap-2">
+            <button onclick="setTransformBase('ex212')" id="btn-base-ex212" class="px-2.5 py-1 rounded bg-sky-600 text-white font-medium">Worked Ex 2.12: $\frac{x^2}{x-3}$</button>
+            <button onclick="setTransformBase('quad')" id="btn-base-quad" class="px-2.5 py-1 rounded bg-slate-800 text-slate-300 font-medium hover:text-white">Page 21: $x^2 - 1$</button>
+            <button onclick="setTransformBase('ex26')" id="btn-base-ex26" class="px-2.5 py-1 rounded bg-slate-800 text-slate-300 font-medium hover:text-white">Worked Ex 2.6: $\frac{x^2-1}{2x-3}$</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:w-5/12 flex flex-col gap-4">
+        <div class="bg-gradient-to-br from-cyan-950/40 via-slate-900 to-slate-900 p-5 rounded-2xl border border-cyan-500/30">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-2xl">🪄</span>
+            <h3 id="trans-story-title" class="text-lg font-bold text-cyan-300 eli6-font">The Magic Mirror Room</h3>
+          </div>
+          <div id="trans-story-body" class="text-sm text-slate-300 space-y-2 leading-relaxed"></div>
+        </div>
+
+        <!-- Transformation Rules Card -->
+        <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 space-y-3">
+          <div class="text-xs font-semibold text-cyan-400 uppercase tracking-wider">Cambridge Transformation Rules:</div>
+          <div id="trans-rules-box" class="space-y-2 text-xs math-font text-slate-300 leading-relaxed"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-challenges" class="tab-panel hidden flex flex-col gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Challenge 1 -->
+        <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between hover:border-sky-500/50 transition">
+          <div>
+            <div class="flex items-center justify-between text-xs mb-2">
+              <span class="px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 font-semibold">Worked Ex 2.8</span>
+              <span class="text-slate-500">Inequalities</span>
+            </div>
+            <h4 class="font-bold text-slate-100 text-sm mb-1">Rational Inequality: $\frac{x+4}{(2x+3)(x+1)} > 1$</h4>
+            <p class="text-xs text-slate-400 mb-3">
+              Rearranging to $2x^2+4x-1 < 0$ gives roots $x = -1 \pm \frac{\sqrt{6}}{2}$. 
+              Crucially, the vertical asymptotes $x = -\frac{3}{2}$ and $x = -1$ cut the interval into two distinct pieces!
+            </p>
+          </div>
+          <button onclick="loadChallengePreset('ex28')" class="w-full py-2 bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 font-semibold text-xs rounded-xl border border-sky-500/40 transition">
+            Inspect Asymptote Cut →
+          </button>
+        </div>
+
+        <!-- Challenge 2 -->
+        <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between hover:border-pink-500/50 transition">
+          <div>
+            <div class="flex items-center justify-between text-xs mb-2">
+              <span class="px-2 py-0.5 rounded bg-pink-500/20 text-pink-300 font-semibold">June 2009 Past Paper</span>
+              <span class="text-slate-500">9231 P1 Q10</span>
+            </div>
+            <h4 class="font-bold text-slate-100 text-sm mb-1">Oblique Parameter: $y = \frac{x^2}{x+\lambda}$</h4>
+            <p class="text-xs text-slate-400 mb-3">
+              Oblique asymptote $y = x - \lambda$. Differentiating yields turning points at $(0,0)$ and $(-2\lambda, -4\lambda)$.
+              Exam asks for separate sketches when $\lambda > 0$ vs $\lambda < 0$.
+            </p>
+          </div>
+          <button onclick="loadChallengePreset('june2009')" class="w-full py-2 bg-pink-500/20 hover:bg-pink-500/30 text-pink-300 font-semibold text-xs rounded-xl border border-pink-500/40 transition">
+            Load into Slant Lab →
+          </button>
+        </div>
+
+        <!-- Challenge 3 -->
+        <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between hover:border-amber-500/50 transition">
+          <div>
+            <div class="flex items-center justify-between text-xs mb-2">
+              <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold">June 2013 Past Paper</span>
+              <span class="text-slate-500">9231 P11 Q10</span>
+            </div>
+            <h4 class="font-bold text-slate-100 text-sm mb-1">Maximum Bound: $y = \frac{2x^2-3x-2}{x^2-2x+1} \le \frac{25}{12}$</h4>
+            <p class="text-xs text-slate-400 mb-3">
+              Repeated pole at $x=1$, horizontal asymptote $y=2$.
+              Cross-multiplying gives $(y-2)x^2 + (3-2y)x + (y+2) = 0$.
+              Discriminant condition $\Delta \ge 0 \implies 12y - 25 \le 0 \implies y \le \frac{25}{12}$!
+            </p>
+          </div>
+          <button onclick="loadChallengePreset('june2013')" class="w-full py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-semibold text-xs rounded-xl border border-amber-500/40 transition">
+            Inspect Bound in Range Lab →
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Interactive Quiz -->
+      <div class="bg-slate-900/70 p-6 rounded-2xl border border-slate-800 mt-2">
+        <h3 class="text-base font-bold text-slate-100 mb-2 flex items-center gap-2">
+          <span>🎯</span> Test Your Intuition: Rational Functions Checkpoint
+        </h3>
+        <p class="text-xs text-slate-400 mb-4">Click an option to inspect the intuitive child-friendly explanation & examiner mark rubric!</p>
+
+        <div class="space-y-4">
+          <!-- Question 1 -->
+          <div class="p-4 bg-slate-950/60 rounded-xl border border-slate-800 text-xs space-y-2">
+            <div class="font-semibold text-slate-200">
+              Q1: Can a curve ever cross its own asymptote?
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <button onclick="checkQuiz(1, 'A')" id="q1-opt-A" class="quiz-btn p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-left transition text-slate-300">
+                A) Never under any circumstances
+              </button>
+              <button onclick="checkQuiz(1, 'B')" id="q1-opt-B" class="quiz-btn p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-left transition text-slate-300">
+                B) It can cross horizontal/oblique asymptotes, but never vertical ones
+              </button>
+              <button onclick="checkQuiz(1, 'C')" id="q1-opt-C" class="quiz-btn p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-left transition text-slate-300">
+                C) It can cross any asymptote anywhere
+              </button>
+            </div>
+            <div id="q1-feedback" class="hidden text-xs p-2.5 rounded-lg mt-2"></div>
+          </div>
+
+          <!-- Question 2 -->
+          <div class="p-4 bg-slate-950/60 rounded-xl border border-slate-800 text-xs space-y-2">
+            <div class="font-semibold text-slate-200">
+              Q2: For $y = \frac{x^2+4}{x-1}$, what happens to the asymptotes when transforming into $y = f(|x|)$?
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <button onclick="checkQuiz(2, 'A')" id="q2-opt-A" class="quiz-btn p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-left transition text-slate-300">
+                A) The asymptotes double: $x = \pm 1$ and $y = \pm x + 1$
+              </button>
+              <button onclick="checkQuiz(2, 'B')" id="q2-opt-B" class="quiz-btn p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-left transition text-slate-300">
+                B) The asymptote stays only at $x = 1$
+              </button>
+              <button onclick="checkQuiz(2, 'C')" id="q2-opt-C" class="quiz-btn p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-left transition text-slate-300">
+                C) All asymptotes disappear completely
+              </button>
+            </div>
+            <div id="q2-feedback" class="hidden text-xs p-2.5 rounded-lg mt-2"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    let currentTab = 'tab-asymptotes';
+    let appMode = 'eli6'; // 'eli6' or 'exam'
+    let snapEnabled = false;
+
+    // Tab 1: Asymptotes State
+    let asympState = {
+      preset: 'linear',
+      // y = (a x^2 + b x + c) / (d x^2 + e x + f)
+      a: 0, b: 1, c: 3,
+      d: 0, e: 1, f: 2,
+      scaleX: 45,
+      scaleY: 35
+    };
+
+    // Tab 2: Oblique State
+    let obliqueState = {
+      preset: 'ex25',
+      lambda: 1.5,
+      scaleX: 30,
+      scaleY: 20
+    };
+
+    // Tab 3: Range State
+    let rangeState = {
+      preset: 'page31',
+      scaleX: 40,
+      scaleY: 30
+    };
+
+    // Tab 4: Transforms State
+    let transState = {
+      base: 'ex212',
+      mode: 'absy', // 'orig', 'recip', 'absy', 'absx', 'y2'
+      scaleX: 25,
+      scaleY: 15
+    };
+
+    /**
+     * STREAMING_CHUNK:Setting up HiDPI Canvas Helper
+     */
+    function setupHiDPICanvas(canvas) {
+      if (!canvas) return { ctx: null, width: 600, height: 440 };
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      const width = rect.width > 0 ? rect.width : (canvas.parentElement ? canvas.parentElement.clientWidth : 600);
+      const height = rect.height > 0 ? rect.height : 440;
+
+      const targetW = Math.floor(width * dpr);
+      const targetH = Math.floor(height * dpr);
+
+      if (canvas.width !== targetW || canvas.height !== targetH) {
+        canvas.width = targetW;
+        canvas.height = targetH;
+      }
+
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      return { ctx, width, height };
+    }
+
+    /**
+     * STREAMING_CHUNK:Configuring Math Render Helper
+     */
+    function renderMath(element) {
+      if (window.renderMathInElement && element) {
+        try {
+          renderMathInElement(element, {
+            delimiters: [
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false}
+            ],
+            throwOnError: false
+          });
+        } catch(e) {
+          console.error("KaTeX error", e);
+        }
+      }
+    }
+
+    /**
+     * STREAMING_CHUNK:Managing Tab Switching
+     */
+    function switchTab(tabId) {
+      currentTab = tabId;
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+      const target = document.getElementById(tabId);
+      if (target) target.classList.remove('hidden');
+
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('bg-sky-500', 'text-slate-950', 'shadow-md', 'font-semibold');
+        b.classList.add('text-slate-400');
+      });
+      const activeBtn = document.getElementById('btn-' + tabId);
+      if (activeBtn) {
+        activeBtn.classList.add('bg-sky-500', 'text-slate-950', 'shadow-md', 'font-semibold');
+        activeBtn.classList.remove('text-slate-400');
+      }
+
+      setTimeout(() => {
+        if (tabId === 'tab-asymptotes') drawAsymptotesCanvas();
+        else if (tabId === 'tab-oblique') drawObliqueCanvas();
+        else if (tabId === 'tab-range') drawRangeCanvas();
+        else if (tabId === 'tab-transforms') drawTransformsCanvas();
+      }, 20);
+    }
+
+    /**
+     * STREAMING_CHUNK:Managing Dual Mode ELI6 vs Exam Switcher
+     */
+    function setAppMode(mode) {
+      appMode = mode;
+      const btnEli6 = document.getElementById('btn-mode-eli6');
+      const btnExam = document.getElementById('btn-mode-exam');
+      const cardEli6 = document.getElementById('card-asymptote-eli6');
+      const cardExam = document.getElementById('card-asymptote-exam');
+      const subtitle = document.getElementById('header-subtitle');
+
+      if (mode === 'eli6') {
+        btnEli6.classList.add('bg-emerald-500/20', 'text-emerald-300', 'border-emerald-500/30');
+        btnEli6.classList.remove('text-slate-400');
+        btnExam.classList.remove('bg-indigo-500/20', 'text-indigo-300', 'border-indigo-500/40');
+        btnExam.classList.add('text-slate-400');
+
+        cardEli6.classList.remove('hidden');
+        cardExam.classList.add('hidden');
+        subtitle.textContent = "Mastering Asymptotes, Oblique Slants, Discriminant Ranges & Graph Transforms with fun stories!";
+      } else {
+        btnExam.classList.add('bg-indigo-500/20', 'text-indigo-300', 'border-indigo-500/40');
+        btnExam.classList.remove('text-slate-400');
+        btnEli6.classList.remove('bg-emerald-500/20', 'text-emerald-300', 'border-emerald-500/30');
+        btnEli6.classList.add('text-slate-400');
+
+        cardExam.classList.remove('hidden');
+        cardEli6.classList.add('hidden');
+        subtitle.textContent = "Cambridge CIE 9231 Further Pure Mathematics 1: Rational Functions Specification";
+      }
+
+      updateAsymptoteDetails();
+      updateObliqueDetails();
+      updateRangeDetails();
+      updateTransformDetails();
+      renderMath(document.body);
+    }
+
+    /**
+     * STREAMING_CHUNK:Toggling Coordinate Snap
+     */
+    function toggleCoordinateSnap() {
+      snapEnabled = !snapEnabled;
+      const btn = document.getElementById('btn-toggle-snap');
+      const label = document.getElementById('snap-label');
+
+      if (snapEnabled) {
+        btn.classList.add('bg-sky-500/20', 'text-sky-300', 'border-sky-500/50');
+        btn.classList.remove('bg-slate-800', 'text-slate-200');
+        label.textContent = 'Snap: ON (0.5)';
+      } else {
+        btn.classList.remove('bg-sky-500/20', 'text-sky-300', 'border-sky-500/50');
+        btn.classList.add('bg-slate-800', 'text-slate-200');
+        label.textContent = 'Snap: OFF';
+      }
+      drawAsymptotesCanvas();
+    }
+
+    // ==========================================
+    // TAB 1: ASYMPTOTE ARCHITECT IMPLEMENTATION
+    // ==========================================
+    const canvasAsymptotes = document.getElementById('canvas-asymptotes');
+
+    function setAsymptotePreset(key) {
+      asympState.preset = key;
+      document.querySelectorAll('.asymptote-pre-btn').forEach(btn => {
+        btn.className = 'asymptote-pre-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition';
+      });
+
+      if (key === 'linear') {
+        // y = (x+3)/(x+2)
+        document.getElementById('btn-pre-linear').className = 'asymptote-pre-btn px-3 py-1.5 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-500/50 font-medium transition';
+        asympState.a = 0; asympState.b = 1; asympState.c = 3;
+        asympState.d = 0; asympState.e = 1; asympState.f = 2;
+        asympState.scaleX = 45; asympState.scaleY = 35;
+      } else if (key === 'two-poles') {
+        // y = 1 / ((x-1)(x-2)) = 1 / (x^2 - 3x + 2)
+        document.getElementById('btn-pre-twopoles').className = 'asymptote-pre-btn px-3 py-1.5 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-500/50 font-medium transition';
+        asympState.a = 0; asympState.b = 0; asympState.c = 1;
+        asympState.d = 1; asympState.e = -3; asympState.f = 2;
+        asympState.scaleX = 45; asympState.scaleY = 35;
+      } else if (key === 'cross-asymptote') {
+        // y = x / ((x+1)(x-3)) = x / (x^2 - 2x - 3)
+        document.getElementById('btn-pre-cross').className = 'asymptote-pre-btn px-3 py-1.5 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-500/50 font-medium transition';
+        asympState.a = 0; asympState.b = 1; asympState.c = 0;
+        asympState.d = 1; asympState.e = -2; asympState.f = -3;
+        asympState.scaleX = 45; asympState.scaleY = 35;
+      } else if (key === 'quad-over-quad') {
+        // y = (x-1)(x-2) / ((2x-1)(x+1)) = (x^2 - 3x + 2) / (2x^2 + x - 1)
+        document.getElementById('btn-pre-quadquad').className = 'asymptote-pre-btn px-3 py-1.5 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-500/50 font-medium transition';
+        asympState.a = 1; asympState.b = -3; asympState.c = 2;
+        asympState.d = 2; asympState.e = 1; asympState.f = -1;
+        asympState.scaleX = 40; asympState.scaleY = 30;
+      }
+
+      updateAsymptoteDetails();
+      drawAsymptotesCanvas();
+    }
+
+    function resetAsymptoteView() {
+      setAsymptotePreset(asympState.preset);
+    }
+
+    /**
+     * STREAMING_CHUNK:Evaluating Tab 1 rational function values and vertical asymptotes
+     */
+    function evalRational(x, s) {
+      const num = s.a * x * x + s.b * x + s.c;
+      const den = s.d * x * x + s.e * x + s.f;
+      if (Math.abs(den) < 1e-6) return null;
+      return num / den;
+    }
+
+    function getVerticalAsymptotes(s) {
+      // Solves d x^2 + e x + f = 0
+      if (s.d === 0) {
+        if (s.e !== 0) return [-s.f / s.e];
+        return [];
+      }
+      const disc = s.e * s.e - 4 * s.d * s.f;
+      if (disc < 0) return [];
+      if (Math.abs(disc) < 1e-6) return [-s.e / (2 * s.d)];
+      const r1 = (-s.e - Math.sqrt(disc)) / (2 * s.d);
+      const r2 = (-s.e + Math.sqrt(disc)) / (2 * s.d);
+      return [r1, r2].sort((a, b) => a - b);
+    }
+
+    function getHorizontalAsymptote(s) {
+      if (s.a === 0 && s.d === 0) {
+        // Linear / linear
+        return s.b / s.e;
+      }
+      if (s.d !== 0) {
+        if (s.a === 0) return 0; // degree num < degree den
+        return s.a / s.d; // degree num == degree den
+      }
+      return null;
+    }
+
+    function updateAsymptoteDetails() {
+      const s = asympState;
+      const vAsym = getVerticalAsymptotes(s);
+      const hAsym = getHorizontalAsymptote(s);
+
+      // Top labels
+      let nameStr = '';
+      if (s.preset === 'linear') nameStr = 'y = (x+3)/(x+2)';
+      else if (s.preset === 'two-poles') nameStr = 'y = 1 / ((x-1)(x-2))';
+      else if (s.preset === 'cross-asymptote') nameStr = 'y = x / ((x+1)(x-3))';
+      else nameStr = 'y = (x-1)(x-2) / ((2x-1)(x+1))';
+
+      document.getElementById('asymptote-func-label').textContent = nameStr;
+      document.getElementById('asymptote-vert-label').textContent = vAsym.length > 0 ? vAsym.map(v => `x = ${v.toFixed(2)}`).join(', ') : 'None';
+      document.getElementById('asymptote-horiz-label').textContent = hAsym !== null ? `y = ${hAsym.toFixed(2)}` : 'None';
+
+      const box = document.getElementById('asymptote-details-box');
+      if (box) {
+        const yInt = evalRational(0, s);
+        box.innerHTML = `
+          <div class="flex justify-between border-b border-slate-800 pb-1">
+            <span>Vertical Asymptotes (Poles):</span>
+            <span class="text-rose-400 font-bold">${vAsym.map(v => `x = ${v.toFixed(2)}`).join(' & ') || 'None'}</span>
+          </div>
+          <div class="flex justify-between border-b border-slate-800 pb-1">
+            <span>Horizontal Asymptote ($x \\to \\pm\\infty$):</span>
+            <span class="text-amber-400 font-bold">${hAsym !== null ? `y = ${hAsym.toFixed(2)}` : 'None'}</span>
+          </div>
+          <div class="flex justify-between border-b border-slate-800 pb-1">
+            <span>$y$-Intercept ($x = 0$):</span>
+            <span class="text-emerald-400 font-bold">${yInt !== null ? `(0, ${yInt.toFixed(2)})` : 'None'}</span>
+          </div>
+          ${s.preset === 'cross-asymptote' ? `
+          <div class="p-2 rounded bg-sky-950/40 border border-sky-500/30 text-sky-200 mt-2">
+            💡 <strong>Special Feature:</strong> This curve intersects its horizontal asymptote $y=0$ right at $(0, 0)$!
+          </div>` : ''}
+        `;
+        renderMath(box);
+      }
+    }
+
+    /**
+     * STREAMING_CHUNK:Drawing Tab 1 Asymptotes Canvas
+     */
+    function drawAsymptotesCanvas() {
+      if (!canvasAsymptotes) return;
+      const { ctx, width, height } = setupHiDPICanvas(canvasAsymptotes);
+      if (!ctx) return;
+      const originX = width / 2;
+      const originY = height / 2;
+      const sx = asympState.scaleX;
+      const sy = asympState.scaleY;
+
+      ctx.clearRect(0, 0, width, height);
+
+      // Grid
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.1)';
+      ctx.lineWidth = 1;
+      for (let x = -10; x <= 10; x++) {
+        ctx.beginPath();
+        ctx.moveTo(originX + x * sx, 0); ctx.lineTo(originX + x * sx, height);
+        ctx.stroke();
+      }
+      for (let y = -10; y <= 10; y++) {
+        ctx.beginPath();
+        ctx.moveTo(0, originY - y * sy); ctx.lineTo(width, originY - y * sy);
+        ctx.stroke();
+      }
+
+      // Coordinate Axes
+      ctx.beginPath();
+      ctx.moveTo(0, originY); ctx.lineTo(width, originY);
+      ctx.moveTo(originX, 0); ctx.lineTo(originX, height);
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.4)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Axis Numbers
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '10px Fira Code, monospace';
+      for (let x = -8; x <= 8; x += 2) {
+        if (x !== 0) ctx.fillText(x, originX + x * sx - 4, originY + 14);
+      }
+      for (let y = -8; y <= 8; y += 2) {
+        if (y !== 0) ctx.fillText(y, originX + 6, originY - y * sy + 3);
+      }
+
+      const vAsym = getVerticalAsymptotes(asympState);
+      const hAsym = getHorizontalAsymptote(asympState);
+
+      // Draw Horizontal Asymptote
+      if (hAsym !== null) {
+        ctx.save();
+        ctx.beginPath();
+        const py = originY - hAsym * sy;
+        ctx.moveTo(0, py); ctx.lineTo(width, py);
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([6, 6]);
+        ctx.stroke();
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillText(`y = ${hAsym.toFixed(2)}`, width - 75, py - 6);
+        ctx.restore();
+      }
+
+      // Draw Vertical Asymptotes (Electric Fences)
+      vAsym.forEach(va => {
+        ctx.save();
+        ctx.beginPath();
+        const px = originX + va * sx;
+        ctx.moveTo(px, 0); ctx.lineTo(px, height);
+        ctx.strokeStyle = '#f43f5e';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.shadowColor = '#f43f5e';
+        ctx.shadowBlur = 8;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#f43f5e';
+        ctx.fillText(`x = ${va.toFixed(2)}`, px + 6, 20);
+        ctx.restore();
+      });
+
+      // Plot Rational Curves with Discontinuity Segments
+      ctx.save();
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2.5;
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 8;
+
+      let drawing = false;
+      const xMin = -originX / sx;
+      const xMax = (width - originX) / sx;
+
+      ctx.beginPath();
+      for (let px = 0; px <= width; px += 1.5) {
+        const x = (px - originX) / sx;
+        
+        // Skip near vertical asymptotes to prevent vertical jump lines
+        let nearAsym = false;
+        for (let va of vAsym) {
+          if (Math.abs(x - va) < 0.08) { nearAsym = true; break; }
+        }
+
+        if (nearAsym) {
+          drawing = false;
+          continue;
+        }
+
+        const y = evalRational(x, asympState);
+        if (y === null || isNaN(y) || Math.abs(y) > 40) {
+          drawing = false;
+          continue;
+        }
+
+        const py = originY - y * sy;
+        if (!drawing) {
+          ctx.moveTo(px, py);
+          drawing = true;
+        } else {
+          ctx.lineTo(px, py);
+        }
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      // Intercepts
+      const yInt = evalRational(0, asympState);
+      if (yInt !== null && Math.abs(yInt) < 20) {
+        const py = originY - yInt * sy;
+        ctx.beginPath();
+        ctx.arc(originX, py, 5, 0, 2 * Math.PI);
+        ctx.fillStyle = '#10b981';
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.stroke();
+        ctx.fillStyle = '#10b981';
+        ctx.font = 'bold 11px Fredoka, sans-serif';
+        ctx.fillText(`(0, ${yInt.toFixed(2)})`, originX + 8, py - 6);
+      }
+    }
+
+    // Pointer hover listener for Tab 1
+    canvasAsymptotes.addEventListener('mousemove', (e) => {
+      const rect = canvasAsymptotes.getBoundingClientRect();
+      const originX = rect.width / 2;
+      const originY = rect.height / 2;
+      let mouseX = (e.clientX - rect.left - originX) / asympState.scaleX;
+      let mouseY = -(e.clientY - rect.top - originY) / asympState.scaleY;
+
+      if (snapEnabled) {
+        mouseX = Math.round(mouseX * 2) / 2;
+        mouseY = Math.round(mouseY * 2) / 2;
+      }
+      document.getElementById('asymptote-mouse-coord').textContent = `(${mouseX.toFixed(2)}, ${mouseY.toFixed(2)})`;
+    });
+
+    // ==========================================
+    // TAB 2: OBLIQUE SLANT ASYMPTOTE LAB
+    // ==========================================
+    const canvasOblique = document.getElementById('canvas-oblique');
+    const sliderLambda = document.getElementById('slider-lambda');
+    const valLambda = document.getElementById('val-lambda');
+
+    sliderLambda.addEventListener('input', (e) => {
+      obliqueState.lambda = parseFloat(e.target.value);
+      valLambda.textContent = obliqueState.lambda;
+      updateObliqueDetails();
+      drawObliqueCanvas();
+    });
+
+    function setObliquePreset(key) {
+      obliqueState.preset = key;
+      document.querySelectorAll('.oblique-pre-btn').forEach(b => {
+        b.className = 'oblique-pre-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition';
+      });
+
+      const toolbar = document.getElementById('oblique-lambda-toolbar');
+      if (key === 'past-paper-lambda') {
+        toolbar.classList.remove('hidden');
+      } else {
+        toolbar.classList.add('hidden');
+      }
+
+      updateObliqueDetails();
+      drawObliqueCanvas();
+    }
+
+    /**
+     * STREAMING_CHUNK:Calculating Tab 2 Oblique Functions and Turning Points
+     */
+    function evalObliqueCurve(x) {
+      const p = obliqueState.preset;
+      if (p === 'ex25') {
+        // y = (x^2 + 1) / (x - 2)
+        if (Math.abs(x - 2) < 1e-4) return null;
+        return (x * x + 1) / (x - 2);
+      } else if (p === 'ex26') {
+        // y = (x^2 - 1) / (2x - 3)
+        if (Math.abs(2 * x - 3) < 1e-4) return null;
+        return (x * x - 1) / (2 * x - 3);
+      } else if (p === 'ex27') {
+        // y = (x^2 - 9) / (1 - x)
+        if (Math.abs(1 - x) < 1e-4) return null;
+        return (x * x - 9) / (1 - x);
+      } else {
+        // June 2009 Past Paper: y = x^2 / (x + lambda)
+        const l = obliqueState.lambda;
+        if (Math.abs(x + l) < 1e-4) return null;
+        return (x * x) / (x + l);
+      }
+    }
+
+    function evalObliqueAsymptoteLine(x) {
+      const p = obliqueState.preset;
+      if (p === 'ex25') return x + 2; // y = x + 2
+      if (p === 'ex26') return 0.5 * x + 0.75; // y = 1/2 x + 3/4
+      if (p === 'ex27') return -x - 1; // y = -x - 1
+      return x - obliqueState.lambda; // y = x - lambda
+    }
+
+    function getObliquePoles() {
+      const p = obliqueState.preset;
+      if (p === 'ex25') return [2];
+      if (p === 'ex26') return [1.5];
+      if (p === 'ex27') return [1];
+      return [-obliqueState.lambda];
+    }
+
+    function updateObliqueDetails() {
+      const p = obliqueState.preset;
+      const title = document.getElementById('oblique-story-title');
+      const steps = document.getElementById('oblique-algebra-steps');
+      const lineBadge = document.getElementById('oblique-line-badge');
+      const tpBadge = document.getElementById('oblique-tp-badge');
+
+      if (p === 'ex25') {
+        lineBadge.textContent = 'y = x + 2';
+        tpBadge.textContent = 'Stationary points at x = 2 ± √5';
+        steps.innerHTML = `
+          <div>1. Numerator degree = 2, Denominator degree = 1 $\\implies$ Oblique asymptote exists!</div>
+          <div>2. Express as partial fractions: $\\frac{x^2+1}{x-2} = Ax + B + \\frac{C}{x-2}$</div>
+          <div>3. Equating terms: $x^2 + 1 = (x+B)(x-2) + C \\implies A=1, B=2, C=5$</div>
+          <div>4. Therefore: $y = (x + 2) + \\frac{5}{x - 2}$</div>
+          <div>5. As $|x| \\to \\infty$, $\\frac{5}{x-2} \\to 0$, curve converges to <strong>$y = x + 2$</strong>!</div>
+        `;
+      } else if (p === 'ex26') {
+        lineBadge.textContent = 'y = 0.5x + 0.75';
+        tpBadge.textContent = 'Stationary points at x = (3 ± √5)/2';
+        steps.innerHTML = `
+          <div>1. Equation: $y = \\frac{x^2-1}{2x-3} = \\frac{1}{2}x + \\frac{3}{4} + \\frac{5/4}{2x-3}$</div>
+          <div>2. Vertical asymptote: $2x - 3 = 0 \\implies x = 1.5$</div>
+          <div>3. Oblique asymptote line: <strong>$y = \\frac{1}{2}x + \\frac{3}{4}$</strong></div>
+          <div>4. Intercepts: $x=0 \\implies y=1/3$; $y=0 \\implies x = \\pm 1$.</div>
+        `;
+      } else if (p === 'ex27') {
+        lineBadge.textContent = 'y = -x - 1';
+        tpBadge.textContent = 'No Real Turning Points!';
+        steps.innerHTML = `
+          <div>1. Equation: $y = \\frac{x^2-9}{1-x} = -x - 1 - \\frac{8}{1-x}$</div>
+          <div>2. Vertical asymptote: $x = 1$</div>
+          <div>3. Oblique line: <strong>$y = -x - 1$</strong> (Negative Slope!)</div>
+          <div>4. Derivative: $\\frac{dy}{dx} = -1 - \\frac{8}{(1-x)^2} < 0$ always $\\implies$ strictly decreasing, NO turning points!</div>
+        `;
+      } else {
+        const l = obliqueState.lambda;
+        lineBadge.textContent = `y = x - ${l.toFixed(1)}`;
+        tpBadge.textContent = `TPs at (0, 0) & (${(-2*l).toFixed(1)}, ${(-4*l).toFixed(1)})`;
+        steps.innerHTML = `
+          <div>1. Cambridge June 2009 Q10: $y = \\frac{x^2}{x+\\lambda} = x - \\lambda + \\frac{\\lambda^2}{x+\\lambda}$</div>
+          <div>2. Oblique Asymptote: <strong>$y = x - \\lambda$</strong>; Vertical: <strong>$x = -\\lambda$</strong></div>
+          <div>3. Derivative: $\\frac{dy}{dx} = 1 - \\frac{\\lambda^2}{(x+\\lambda)^2} = 0 \\implies (x+\\lambda)^2 = \\lambda^2$</div>
+          <div>4. Solves to $x = 0$ (giving $(0,0)$) and $x = -2\\lambda$ (giving $(-2\\lambda, -4\\lambda)$)!</div>
+          <div>5. When $\\lambda > 0$, $(0,0)$ is a local maximum. When $\\lambda < 0$, $(0,0)$ is a local minimum!</div>
+        `;
+      }
+      renderMath(steps);
+    }
+
+    /**
+     * STREAMING_CHUNK:Drawing Tab 2 Oblique Canvas
+     */
+    function drawObliqueCanvas() {
+      if (!canvasOblique) return;
+      const { ctx, width, height } = setupHiDPICanvas(canvasOblique);
+      if (!ctx) return;
+      const originX = width / 2;
+      const originY = height / 2;
+      const sx = obliqueState.scaleX;
+      const sy = obliqueState.scaleY;
+
+      ctx.clearRect(0, 0, width, height);
+
+      // Grid
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.1)';
+      ctx.lineWidth = 1;
+      for (let x = -15; x <= 15; x++) {
+        ctx.beginPath();
+        ctx.moveTo(originX + x * sx, 0); ctx.lineTo(originX + x * sx, height);
+        ctx.stroke();
+      }
+      for (let y = -15; y <= 15; y++) {
+        ctx.beginPath();
+        ctx.moveTo(0, originY - y * sy); ctx.lineTo(width, originY - y * sy);
+        ctx.stroke();
+      }
+
+      // Coordinate Axes
+      ctx.beginPath();
+      ctx.moveTo(0, originY); ctx.lineTo(width, originY);
+      ctx.moveTo(originX, 0); ctx.lineTo(originX, height);
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.4)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      const poles = getObliquePoles();
+
+      // Vertical Pole (Dashed Red)
+      poles.forEach(p => {
+        ctx.save();
+        ctx.beginPath();
+        const px = originX + p * sx;
+        ctx.moveTo(px, 0); ctx.lineTo(px, height);
+        ctx.strokeStyle = '#f43f5e';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+        ctx.fillStyle = '#f43f5e';
+        ctx.font = '10px monospace';
+        ctx.fillText(`x = ${p.toFixed(2)}`, px + 6, 20);
+        ctx.restore();
+      });
+
+      // Oblique Asymptote Line (Dashed Pink)
+      ctx.save();
+      ctx.beginPath();
+      const x1 = -originX / sx;
+      const x2 = (width - originX) / sx;
+      const y1 = evalObliqueAsymptoteLine(x1);
+      const y2 = evalObliqueAsymptoteLine(x2);
+      ctx.moveTo(originX + x1 * sx, originY - y1 * sy);
+      ctx.lineTo(originX + x2 * sx, originY - y2 * sy);
+      ctx.strokeStyle = '#ec4899';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 6]);
+      ctx.stroke();
+      ctx.restore();
+
+      // Plot Rational Curves
+      ctx.save();
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2.5;
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 8;
+
+      let drawing = false;
+      for (let px = 0; px <= width; px += 1.5) {
+        const x = (px - originX) / sx;
+
+        let nearPole = false;
+        for (let p of poles) {
+          if (Math.abs(x - p) < 0.1) { nearPole = true; break; }
+        }
+        if (nearPole) { drawing = false; continue; }
+
+        const y = evalObliqueCurve(x);
+        if (y === null || isNaN(y) || Math.abs(y) > 40) {
+          drawing = false;
+          continue;
+        }
+
+        const py = originY - y * sy;
+        if (!drawing) {
+          ctx.moveTo(px, py);
+          drawing = true;
+        } else {
+          ctx.lineTo(px, py);
+        }
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      // Highlight Turning Points for past paper
+      if (obliqueState.preset === 'past-paper-lambda') {
+        const l = obliqueState.lambda;
+        const pts = [
+          { x: 0, y: 0, label: '(0,0)' },
+          { x: -2 * l, y: -4 * l, label: `(${-2*l}, ${-4*l})` }
+        ];
+        pts.forEach(pt => {
+          const px = originX + pt.x * sx;
+          const py = originY - pt.y * sy;
+          ctx.beginPath();
+          ctx.arc(px, py, 6, 0, 2 * Math.PI);
+          ctx.fillStyle = '#10b981';
+          ctx.shadowColor = '#10b981';
+          ctx.shadowBlur = 8;
+          ctx.fill();
+          ctx.strokeStyle = '#ffffff';
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = '#10b981';
+          ctx.font = 'bold 11px Fredoka, sans-serif';
+          ctx.fillText(pt.label, px + 8, py - 8);
+        });
+      }
+    }
+
+    // ==========================================
+    // TAB 3: RANGE & DISCRIMINANT IMPLEMENTATION
+    // ==========================================
+    const canvasRange = document.getElementById('canvas-range');
+
+    function setRangePreset(key) {
+      rangeState.preset = key;
+      document.querySelectorAll('.range-pre-btn').forEach(b => {
+        b.className = 'range-pre-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition';
+      });
+
+      updateRangeDetails();
+      drawRangeCanvas();
+    }
+
+    /**
+     * STREAMING_CHUNK:Calculating Tab 3 Range Curves and Forbidden Bands
+     */
+    function evalRangeCurve(x) {
+      const p = rangeState.preset;
+      if (p === 'page31') {
+        // y = (x^2 + 2x - 1) / (2x - 1)
+        if (Math.abs(2 * x - 1) < 1e-4) return null;
+        return (x * x + 2 * x - 1) / (2 * x - 1);
+      } else if (p === 'ex210') {
+        // y = (x^2 - x - 2) / (x^2 - x + 5)
+        const d = x * x - x + 5;
+        return (x * x - x - 2) / d;
+      } else if (p === 'june2013') {
+        // y = (2x^2 - 3x - 2) / (x^2 - 2x + 1)
+        const d = (x - 1) * (x - 1);
+        if (Math.abs(d) < 1e-4) return null;
+        return (2 * x * x - 3 * x - 2) / d;
+      } else {
+        // y = 1 / (x^2 + 3x + 6)
+        return 1 / (x * x + 3 * x + 6);
+      }
+    }
+
+    function getRangeForbiddenBand() {
+      const p = rangeState.preset;
+      if (p === 'page31') return { min: 1, max: 2, insideForbidden: true };
+      if (p === 'ex210') return { min: -9 / 19, max: 1, insideForbidden: false }; // range is [-9/19, 1)
+      if (p === 'june2013') return { min: -Infinity, max: 25 / 12, insideForbidden: false }; // range is y <= 25/12
+      return { min: 0, max: 4 / 15, insideForbidden: false }; // range is (0, 4/15]
+    }
+
+    function updateRangeDetails() {
+      const p = rangeState.preset;
+      const discrBadge = document.getElementById('range-discr-badge');
+      const validBadge = document.getElementById('range-valid-badge');
+      const box = document.getElementById('range-algebra-box');
+
+      if (p === 'page31') {
+        discrBadge.textContent = 'Δ = 4(y-1)(y-2) < 0';
+        validBadge.textContent = 'y ≤ 1 or y ≥ 2';
+        box.innerHTML = `
+          <div>1. Equation: $y = \\frac{x^2+2x-1}{2x-1} \\implies x^2 + 2(1-y)x + (y-1) = 0$</div>
+          <div>2. For real $x$, discriminant $B^2 - 4AC \\ge 0$:</div>
+          <div>3. $[2(1-y)]^2 - 4(1)(y-1) \\ge 0 \\implies 4(y-1)(y-2) \\ge 0$</div>
+          <div>4. Forbidden zone: $1 < y < 2$. Thus, range is <strong>$y \\le 1$ or $y \\ge 2$</strong>!</div>
+          <div>5. Turning points occur at boundaries: $(0, 1)$ and $(1, 2)$!</div>
+        `;
+      } else if (p === 'ex210') {
+        discrBadge.textContent = '19y² - 10y - 9 ≤ 0';
+        validBadge.textContent = '-9/19 ≤ y < 1';
+        box.innerHTML = `
+          <div>1. Equation: $y = \\frac{x^2-x-2}{x^2-x+5} \\implies (y-1)x^2 + (1-y)x + (5y+2) = 0$</div>
+          <div>2. Discriminant: $(1-y)^2 - 4(y-1)(5y+2) \\ge 0$</div>
+          <div>3. Factorising gives $-(y-1)(19y+9) \\ge 0 \\implies (y-1)(19y+9) \\le 0$</div>
+          <div>4. Valid range: <strong>$-\\frac{9}{19} \\le y < 1$</strong> (note $y \\ne 1$ because $y=1$ is horizontal asymptote)!</div>
+        `;
+      } else if (p === 'june2013') {
+        discrBadge.textContent = '12y - 25 ≤ 0';
+        validBadge.textContent = 'y ≤ 25/12';
+        box.innerHTML = `
+          <div>1. Cambridge June 2013 Q10: $y = \\frac{2x^2-3x-2}{(x-1)^2} \\implies (y-2)x^2 + (3-2y)x + (y+2) = 0$</div>
+          <div>2. $\\Delta = (3-2y)^2 - 4(y-2)(y+2) = 9 - 12y + 4y^2 - 4(y^2-4) = 25 - 12y$</div>
+          <div>3. For real $x$, $25 - 12y \\ge 0 \\implies 12y \\le 25 \\implies y \\le \\frac{25}{12}$!</div>
+          <div>4. Maximum value is exactly $y_{\\max} = \\frac{25}{12}$ at $x = -7$!</div>
+        `;
+      } else {
+        discrBadge.textContent = '-15y² + 4y ≥ 0';
+        validBadge.textContent = '0 < y ≤ 4/15';
+        box.innerHTML = `
+          <div>1. Equation: $y = \\frac{1}{x^2+3x+6} \\implies yx^2 + 3yx + (6y-1) = 0$</div>
+          <div>2. $\\Delta = (3y)^2 - 4(y)(6y-1) = 9y^2 - 24y^2 + 4y = -15y^2 + 4y$</div>
+          <div>3. Condition $\\Delta \\ge 0 \\implies y(4 - 15y) \\ge 0 \\implies 0 \\le y \\le \\frac{4}{15}$</div>
+          <div>4. Since $y=0$ is an asymptote never reached, range is <strong>$0 < y \\le \\frac{4}{15}$</strong>!</div>
+        `;
+      }
+      renderMath(box);
+    }
+
+    /**
+     * STREAMING_CHUNK:Drawing Tab 3 Range Canvas
+     */
+    function drawRangeCanvas() {
+      if (!canvasRange) return;
+      const { ctx, width, height } = setupHiDPICanvas(canvasRange);
+      if (!ctx) return;
+      const originX = width / 2;
+      const originY = height / 2;
+      const sx = rangeState.scaleX;
+      const sy = rangeState.scaleY;
+
+      ctx.clearRect(0, 0, width, height);
+
+      // Forbidden Zone Shading
+      const band = getRangeForbiddenBand();
+      if (rangeState.preset === 'page31') {
+        const topY = originY - band.max * sy;
+        const botY = originY - band.min * sy;
+        ctx.fillStyle = 'rgba(244, 63, 94, 0.15)';
+        ctx.fillRect(0, topY, width, botY - topY);
+
+        // Boundary lines
+        ctx.beginPath();
+        ctx.moveTo(0, topY); ctx.lineTo(width, topY);
+        ctx.moveTo(0, botY); ctx.lineTo(width, botY);
+        ctx.strokeStyle = '#f43f5e';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+
+      // Grid
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.1)';
+      ctx.lineWidth = 1;
+      for (let x = -10; x <= 10; x++) {
+        ctx.beginPath();
+        ctx.moveTo(originX + x * sx, 0); ctx.lineTo(originX + x * sx, height);
+        ctx.stroke();
+      }
+      for (let y = -10; y <= 10; y++) {
+        ctx.beginPath();
+        ctx.moveTo(0, originY - y * sy); ctx.lineTo(width, originY - y * sy);
+        ctx.stroke();
+      }
+
+      // Axes
+      ctx.beginPath();
+      ctx.moveTo(0, originY); ctx.lineTo(width, originY);
+      ctx.moveTo(originX, 0); ctx.lineTo(originX, height);
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.4)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Plot curve
+      ctx.save();
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2.5;
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 8;
+
+      let drawing = false;
+      for (let px = 0; px <= width; px += 1.5) {
+        const x = (px - originX) / sx;
+
+        if (rangeState.preset === 'page31' && Math.abs(x - 0.5) < 0.1) {
+          drawing = false; continue;
+        }
+        if (rangeState.preset === 'june2013' && Math.abs(x - 1) < 0.1) {
+          drawing = false; continue;
+        }
+
+        const y = evalRangeCurve(x);
+        if (y === null || isNaN(y) || Math.abs(y) > 25) {
+          drawing = false;
+          continue;
+        }
+
+        const py = originY - y * sy;
+        if (!drawing) {
+          ctx.moveTo(px, py);
+          drawing = true;
+        } else {
+          ctx.lineTo(px, py);
+        }
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // ==========================================
+    // TAB 4: GRAPH TRANSFORMATIONS ENGINE
+    // ==========================================
+    const canvasTransforms = document.getElementById('canvas-transforms');
+
+    function setTransformMode(mode) {
+      transState.mode = mode;
+      document.querySelectorAll('.trans-btn').forEach(b => {
+        b.className = 'trans-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition';
+      });
+      const active = document.getElementById('btn-tr-' + mode);
+      if (active) {
+        active.className = 'trans-btn px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 font-medium transition';
+      }
+
+      updateTransformDetails();
+      drawTransformsCanvas();
+    }
+
+    function setTransformBase(baseKey) {
+      transState.base = baseKey;
+      ['ex212', 'quad', 'ex26'].forEach(k => {
+        const b = document.getElementById('btn-base-' + k);
+        if (k === baseKey) b.className = 'px-2.5 py-1 rounded bg-sky-600 text-white font-medium';
+        else b.className = 'px-2.5 py-1 rounded bg-slate-800 text-slate-300 font-medium hover:text-white';
+      });
+
+      updateTransformDetails();
+      drawTransformsCanvas();
+    }
+
+    /**
+     * STREAMING_CHUNK:Evaluating Tab 4 Transformations
+     */
+    function evalBaseTransform(x) {
+      const b = transState.base;
+      if (b === 'ex212') {
+        // y = x^2 / (x - 3)
+        if (Math.abs(x - 3) < 1e-4) return null;
+        return (x * x) / (x - 3);
+      } else if (b === 'quad') {
+        // y = x^2 - 1
+        return x * x - 1;
+      } else {
+        // y = (x^2 - 1) / (2x - 3)
+        if (Math.abs(2 * x - 3) < 1e-4) return null;
+        return (x * x - 1) / (2 * x - 3);
+      }
+    }
+
+    function evalTransformedPoint(x) {
+      const m = transState.mode;
+      if (m === 'orig') return evalBaseTransform(x);
+      if (m === 'recip') {
+        const y = evalBaseTransform(x);
+        if (y === null || Math.abs(y) < 1e-5) return null;
+        return 1 / y;
+      }
+      if (m === 'absy') {
+        const y = evalBaseTransform(x);
+        return y !== null ? Math.abs(y) : null;
+      }
+      if (m === 'absx') {
+        return evalBaseTransform(Math.abs(x));
+      }
+      if (m === 'y2') {
+        const y = evalBaseTransform(x);
+        if (y === null || y < 0) return null;
+        return Math.sqrt(y); // top wing
+      }
+      return null;
+    }
+
+    function updateTransformDetails() {
+      const m = transState.mode;
+      const title = document.getElementById('trans-story-title');
+      const body = document.getElementById('trans-story-body');
+      const rules = document.getElementById('trans-rules-box');
+      const badge = document.getElementById('trans-mode-badge');
+
+      if (m === 'orig') {
+        badge.textContent = 'y = f(x) (Base Curve)';
+        title.textContent = '🌟 The Base Rollercoaster Curve';
+        body.innerHTML = 'This is our original curve before applying magic mirrors or square wings!';
+        rules.innerHTML = '<div>• Shows the baseline poles, asymptotes, and roots before transformation.</div>';
+      } else if (m === 'recip') {
+        badge.textContent = 'y = 1 / f(x) (Reciprocal Inversion)';
+        title.textContent = '🔄 The Seesaw Somersault (1/f(x))';
+        body.innerHTML = 'Every root where $f(x)=0$ flips upside-down into an infinite skyscraper ($x$-asymptote)! Giant mountains turn into tiny valleys!';
+        rules.innerHTML = `
+          <div>• Zeros of $f(x)$ become <strong>vertical asymptotes</strong> of $\\frac{1}{f(x)}$.</div>
+          <div>• As $f(x) \\to \\pm\\infty$, $\\frac{1}{f(x)} \\to 0$ (Horizontal Asymptote $y=0$).</div>
+          <div>• Local maximum at $(x_0, y_0)$ inverts to local minimum at $(x_0, 1/y_0)$.</div>
+        `;
+      } else if (m === 'absy') {
+        badge.textContent = 'y = |f(x)| (Absolute Value Reflection)';
+        title.textContent = '✨ The Trampoline Bounce (|f(x)|)';
+        body.innerHTML = 'Any part of the roller coaster dipping into the cold lake ($y < 0$) gets bounced straight up into sunny positive land!';
+        rules.innerHTML = `
+          <div>• For all $x$ where $f(x) \\ge 0$, the graph is <strong>identical</strong> to $y = f(x)$.</div>
+          <div>• For $f(x) < 0$, reflect the curve across the $x$-axis.</div>
+          <div>• Oblique asymptotes $y = Ax + B$ also reflect into $y = -Ax - B$ for the negative branches!</div>
+        `;
+      } else if (m === 'absx') {
+        badge.textContent = 'y = f(|x|) (Even Y-Axis Mirror)';
+        title.textContent = '🦋 The Butterfly Stunt-Double (f(|x|))';
+        body.innerHTML = 'Erase everything on the left ($x < 0$). Then look in the $y$-axis mirror: the right side copies itself onto the left side, making an even butterfly!';
+        rules.innerHTML = `
+          <div>• Retain the curve for $x \\ge 0$. Discard the original $x < 0$ branch.</div>
+          <div>• Reflect the $x \\ge 0$ section across the vertical $y$-axis.</div>
+          <div>• Result is always symmetrical about the $y$-axis ($f(|-x|) = f(|x|)$).</div>
+          <div>• Vertical asymptote $x = c$ creates an additional twin at $x = -c$!</div>
+        `;
+      } else {
+        badge.textContent = 'y² = f(x) (Twin Parabolic Wings)';
+        title.textContent = '🦅 The Eagle Wings (y² = f(x))';
+        body.innerHTML = 'Since $y^2$ can never be negative, the curve completely vanishes anywhere $f(x) < 0$! Where $f(x) > 0$, you get twin mirror wings ($+\\sqrt{f(x)}$ and $-\\sqrt{f(x)}$)!';
+        rules.innerHTML = `
+          <div>• Domain restriction: Exclude all intervals where $f(x) < 0$.</div>
+          <div>• For $f(x) \\ge 0$, sketch $y = +\\sqrt{f(x)}$ and reflect across the $x$-axis as $y = -\\sqrt{f(x)}$.</div>
+          <div>• The graph is strictly symmetrical about the horizontal $x$-axis.</div>
+        `;
+      }
+      renderMath(rules);
+    }
+
+    /**
+     * STREAMING_CHUNK:Drawing Tab 4 Transformations Canvas
+     */
+    function drawTransformsCanvas() {
+      if (!canvasTransforms) return;
+      const { ctx, width, height } = setupHiDPICanvas(canvasTransforms);
+      if (!ctx) return;
+      const originX = width / 2;
+      const originY = height / 2;
+      const sx = transState.scaleX;
+      const sy = transState.scaleY;
+
+      ctx.clearRect(0, 0, width, height);
+
+      // Grid
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.1)';
+      ctx.lineWidth = 1;
+      for (let x = -15; x <= 15; x++) {
+        ctx.beginPath();
+        ctx.moveTo(originX + x * sx, 0); ctx.lineTo(originX + x * sx, height);
+        ctx.stroke();
+      }
+      for (let y = -15; y <= 15; y++) {
+        ctx.beginPath();
+        ctx.moveTo(0, originY - y * sy); ctx.lineTo(width, originY - y * sy);
+        ctx.stroke();
+      }
+
+      // Axes
+      ctx.beginPath();
+      ctx.moveTo(0, originY); ctx.lineTo(width, originY);
+      ctx.moveTo(originX, 0); ctx.lineTo(originX, height);
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.4)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Plot Faint Base Curve
+      ctx.save();
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.25)';
+      ctx.lineWidth = 1.5;
+      let drawBase = false;
+      for (let px = 0; px <= width; px += 2) {
+        const x = (px - originX) / sx;
+        const y = evalBaseTransform(x);
+        if (y === null || isNaN(y) || Math.abs(y) > 30) {
+          drawBase = false; continue;
+        }
+        const py = originY - y * sy;
+        if (!drawBase) { ctx.moveTo(px, py); drawBase = true; }
+        else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      // Plot Transformed Curve
+      ctx.save();
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2.5;
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 8;
+
+      let drawTrans = false;
+      for (let px = 0; px <= width; px += 1.5) {
+        const x = (px - originX) / sx;
+        const y = evalTransformedPoint(x);
+        if (y === null || isNaN(y) || Math.abs(y) > 30) {
+          drawTrans = false; continue;
+        }
+        const py = originY - y * sy;
+        if (!drawTrans) { ctx.moveTo(px, py); drawTrans = true; }
+        else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+
+      // If y^2 = f(x), draw bottom wing
+      if (transState.mode === 'y2') {
+        ctx.strokeStyle = '#06b6d4';
+        let drawBot = false;
+        ctx.beginPath();
+        for (let px = 0; px <= width; px += 1.5) {
+          const x = (px - originX) / sx;
+          const y = evalTransformedPoint(x);
+          if (y === null || isNaN(y) || Math.abs(y) > 30) {
+            drawBot = false; continue;
+          }
+          const py = originY - (-y) * sy; // negative wing
+          if (!drawBot) { ctx.moveTo(px, py); drawBot = true; }
+          else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // ==========================================
+    // TAB 5: CHALLENGES & QUIZ IMPLEMENTATION
+    // ==========================================
+    function loadChallengePreset(key) {
+      if (key === 'ex28') {
+        switchTab('tab-asymptotes');
+        setAsymptotePreset('cross-asymptote');
+      } else if (key === 'june2009') {
+        switchTab('tab-oblique');
+        setObliquePreset('past-paper-lambda');
+      } else if (key === 'june2013') {
+        switchTab('tab-range');
+        setRangePreset('june2013');
+      }
+    }
+
+    function checkQuiz(qNum, choice) {
+      const feedback = document.getElementById(`q${qNum}-feedback`);
+      feedback.classList.remove('hidden', 'bg-emerald-500/20', 'text-emerald-300', 'border-emerald-500/40', 'bg-rose-500/20', 'text-rose-300', 'border-rose-500/40');
+
+      if (qNum === 1) {
+        if (choice === 'B') {
+          feedback.classList.add('bg-emerald-500/20', 'text-emerald-300', 'border', 'border-emerald-500/40');
+          feedback.innerHTML = '🎉 <strong>Spot on!</strong> Asymptotes define behaviour as $x \\to \\pm\\infty$. Horizontal or oblique lines can be crossed in the finite middle (like Worked Example 2.2 crossing $y=0$ at $(0,0)$). But a curve can <em>never</em> cross a vertical asymptote because division by zero is undefined!';
+        } else {
+          feedback.classList.add('bg-rose-500/20', 'text-rose-300', 'border', 'border-rose-500/40');
+          feedback.innerHTML = '❌ <strong>Careful!</strong> That is a very common misconception. While a curve can never touch or cross a vertical asymptote (division by zero), it frequently crosses horizontal or oblique asymptotes in the middle!';
+        }
+      } else if (qNum === 2) {
+        if (choice === 'A') {
+          feedback.classList.add('bg-emerald-500/20', 'text-emerald-300', 'border', 'border-emerald-500/40');
+          feedback.innerHTML = '🎉 <strong>Brilliant observation!</strong> Because $y = f(|x|)$ reflects the entire right side ($x \\ge 0$) across the $y$-axis, the vertical pole $x=1$ reflects into $x=-1$, and the oblique asymptote $y = x+1$ reflects into $y = -x+1$! See Worked Example 2.12!';
+        } else {
+          feedback.classList.add('bg-rose-500/20', 'text-rose-300', 'border', 'border-rose-500/40');
+          feedback.innerHTML = '❌ <strong>Look closer at the mirror symmetry:</strong> In $y = f(|x|)$, substituting $x = -a$ yields $f(|-a|) = f(a)$. Everything on the positive side is mirrored, creating twin poles at $x = \\pm 1$!';
+        }
+      }
+      renderMath(feedback);
+    }
+
+    // Window Listeners & Init
+    window.addEventListener('resize', () => {
+      if (currentTab === 'tab-asymptotes') drawAsymptotesCanvas();
+      if (currentTab === 'tab-oblique') drawObliqueCanvas();
+      if (currentTab === 'tab-range') drawRangeCanvas();
+      if (currentTab === 'tab-transforms') drawTransformsCanvas();
+    });
+
+    window.onload = function() {
+      setAppMode('eli6');
+      setAsymptotePreset('linear');
+      setObliquePreset('ex25');
+      setRangePreset('page31');
+      setTransformBase('ex212');
+      setTransformMode('absy');
+      renderMath(document.body);
+    };
+  </script>
+</body>
+</html>

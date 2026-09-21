@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vectors 3D Interactive Lab | Cambridge 9231 Further Mathematics</title>
+  <!-- KaTeX for crisp mathematical notation -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.js"></script>
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --panel-bg: #131b2e;
+      --card-bg: #1a243d;
+      --accent-cyan: #06b6d4;
+      --accent-blue: #3b82f6;
+      --accent-purple: #8b5cf6;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border-color: #243456;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      background: rgba(19, 27, 46, 0.95);
+      border-bottom: 1px solid var(--border-color);
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(10px);
+      z-index: 100;
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: bold; color: white;
+    }
+    .brand-title { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.5px; }
+    .brand-sub { font-size: 0.75rem; color: var(--text-muted); }
+
+    .header-controls { display: flex; align-items: center; gap: 12px; }
+    .toggle-group {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      display: flex;
+      padding: 3px;
+    }
+    .toggle-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .toggle-btn.active { background: var(--accent-blue); color: white; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4); }
+    .snap-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--accent-amber);
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .snap-btn.active {
+      background: rgba(245, 158, 11, 0.15);
+      border-color: var(--accent-amber);
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+    }
+
+    nav.tab-bar {
+      display: flex;
+      background: var(--panel-bg);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0 20px;
+      gap: 8px;
+    }
+    .tab-item {
+      padding: 12px 18px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tab-item:hover { color: var(--text-main); }
+    .tab-item.active {
+      color: var(--accent-cyan);
+      border-bottom-color: var(--accent-cyan);
+      background: rgba(6, 182, 212, 0.05);
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .tab-content {
+      display: none;
+      width: 100%;
+      height: 100%;
+    }
+    .tab-content.active {
+      display: flex;
+    }
+
+    /* Layout Split */
+    .viewport-pane {
+      flex: 1.35;
+      position: relative;
+      background: radial-gradient(circle at center, #172138 0%, #0a0e1a 100%);
+      overflow: hidden;
+    }
+    .sidebar-pane {
+      flex: 1;
+      background: var(--panel-bg);
+      border-left: 1px solid var(--border-color);
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+    }
+    canvas:active { cursor: grabbing; }
+
+    .canvas-hud {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background: rgba(19, 27, 46, 0.85);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.8rem;
+      pointer-events: none;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    .hud-stat { display: flex; align-items: center; gap: 8px; margin: 3px 0; }
+    .hud-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    .canvas-controls {
+      position: absolute;
+      bottom: 15px;
+      left: 15px;
+      display: flex;
+      gap: 8px;
+    }
+    .icon-btn {
+      background: rgba(19, 27, 46, 0.85);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      backdrop-filter: blur(6px);
+      transition: all 0.2s;
+    }
+    .icon-btn:hover { background: var(--card-bg); border-color: var(--accent-cyan); }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent-cyan);
+    }
+
+    .eli6-box {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 0.85rem;
+      line-height: 1.45;
+      color: #a7f3d0;
+    }
+    .exam-box {
+      background: rgba(59, 130, 246, 0.08);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 0.85rem;
+      line-height: 1.45;
+      color: #bfdbfe;
+    }
+
+    .preset-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .pill {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 5px 12px;
+      border-radius: 14px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .pill:hover, .pill.active {
+      background: rgba(6, 182, 212, 0.15);
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+      font-size: 0.85rem;
+    }
+    .control-row label { flex: 1; color: var(--text-muted); }
+    .control-row input[type="range"] {
+      flex: 1.5;
+      accent-color: var(--accent-cyan);
+    }
+    .val-display {
+      width: 45px;
+      text-align: right;
+      font-family: monospace;
+      font-weight: bold;
+      color: var(--accent-cyan);
+    }
+
+    .math-pill {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px;
+      margin: 8px 0;
+      font-size: 0.85rem;
+      overflow-x: auto;
+    }
+
+    .step-item {
+      border-left: 2px solid var(--accent-blue);
+      padding-left: 12px;
+      margin-bottom: 12px;
+    }
+    .step-label { font-size: 0.75rem; font-weight: 700; color: var(--accent-blue); text-transform: uppercase; }
+    .step-desc { font-size: 0.85rem; margin-top: 2px; }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--panel-bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">3D</div>
+      <div>
+        <div class="brand-title">Vectors & 3D Geometry Lab</div>
+        <div class="brand-sub">Cambridge International 9231 Further Pure Mathematics 1 (Chapter 6)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <button id="snapToggle" class="snap-btn active" onclick="toggleCoordinateSnap()" title="Snap to integer or special increments">
+        <span>🧲 Snap: <b id="snapState">ON (Int)</b></span>
+      </button>
+
+      <div class="toggle-group">
+        <button id="modeEli6" class="toggle-btn" onclick="setAppMode('eli6')">
+          <span>👶 6-Year-Old</span>
+        </button>
+        <button id="modeExam" class="toggle-btn active" onclick="setAppMode('exam')">
+          <span>🎓 Exam 9231</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tab Bar -->
+  <nav class="tab-bar">
+    <div class="tab-item active" onclick="switchTab(0)">
+      <span>⚔️ Vector Product & Areas</span>
+    </div>
+    <div class="tab-item" onclick="switchTab(1)">
+      <span>📏 Lines & Skew Distances</span>
+    </div>
+    <div class="tab-item" onclick="switchTab(2)">
+      <span>📐 Planes & Intersections</span>
+    </div>
+    <div class="tab-item" onclick="switchTab(3)">
+      <span>🏛️ Past Paper Challenges</span>
+    </div>
+  </nav>
+
+  <!-- Main Work Area -->
+  <main>
+
+    <!-- TAB 1: Vector Cross Product & Parallelogram/Triangle/Tetrahedron Areas -->
+    <div id="tab-0" class="tab-content active">
+      <div class="viewport-pane">
+        <canvas id="canvasTab0"></canvas>
+        <div class="canvas-hud">
+          <div class="hud-stat"><span class="hud-dot" style="background:#f43f5e;"></span> Vector $\mathbf{a}$: <span id="hudVecA" style="font-family:monospace; margin-left:4px;"></span></div>
+          <div class="hud-stat"><span class="hud-dot" style="background:#3b82f6;"></span> Vector $\mathbf{b}$: <span id="hudVecB" style="font-family:monospace; margin-left:4px;"></span></div>
+          <div class="hud-stat"><span class="hud-dot" style="background:#10b981;"></span> Normal $\mathbf{n} = \mathbf{a} \times \mathbf{b}$: <span id="hudVecN" style="font-family:monospace; margin-left:4px;"></span></div>
+          <div class="hud-stat"><span class="hud-dot" style="background:#f59e0b;"></span> Parallelogram Area: <b id="hudAreaPara" style="margin-left:4px;"></b></div>
+        </div>
+        <div class="canvas-controls">
+          <button class="icon-btn" onclick="resetCamera(0)">🔄 Reset View</button>
+          <button class="icon-btn" onclick="toggleShapeTab0()">🔷 Shape: <span id="shapeLabel0">Parallelogram</span></button>
+        </div>
+      </div>
+
+      <div class="sidebar-pane">
+        <div class="card">
+          <div class="card-title"><span>🌟 Preset Vectors</span></div>
+          <div class="preset-pills">
+            <button class="pill active" onclick="loadCrossPreset(0)">Ex 6.1 (a) Perpendicular</button>
+            <button class="pill" onclick="loadCrossPreset(1)">Ex 6.2 Triangle ABC</button>
+            <button class="pill" onclick="loadCrossPreset(2)">Ex 6.3 Tetrahedron OABC</button>
+            <button class="pill" onclick="loadCrossPreset(3)">Right-Hand Rule Demo</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span>🎛️ Vector Coordinates</span></div>
+          <div style="font-size:0.8rem; font-weight:700; color:#f43f5e; margin-bottom:6px;">Vector a = (x₁, y₁, z₁)</div>
+          <div class="control-row"><label>a.x</label><input type="range" id="ax" min="-6" max="6" step="1" value="2" oninput="updateCrossParams()"><span class="val-display" id="axVal">2</span></div>
+          <div class="control-row"><label>a.y</label><input type="range" id="ay" min="-6" max="6" step="1" value="3" oninput="updateCrossParams()"><span class="val-display" id="ayVal">3</span></div>
+          <div class="control-row"><label>a.z</label><input type="range" id="az" min="-6" max="6" step="1" value="1" oninput="updateCrossParams()"><span class="val-display" id="azVal">1</span></div>
+
+          <div style="font-size:0.8rem; font-weight:700; color:#3b82f6; margin:12px 0 6px 0;">Vector b = (x₂, y₂, z₂)</div>
+          <div class="control-row"><label>b.x</label><input type="range" id="bx" min="-6" max="6" step="1" value="-1" oninput="updateCrossParams()"><span class="val-display" id="bxVal">-1</span></div>
+          <div class="control-row"><label>b.y</label><input type="range" id="by" min="-6" max="6" step="1" value="4" oninput="updateCrossParams()"><span class="val-display" id="byVal">4</span></div>
+          <div class="control-row"><label>b.z</label><input type="range" id="bz" min="-6" max="6" step="1" value="2" oninput="updateCrossParams()"><span class="val-display" id="bzVal">2</span></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span id="tab0ExplTitle">Intuition Breakdown</span></div>
+          <div id="tab0ExplBody"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span>🧮 Live Vector Calculations</span></div>
+          <div class="math-pill" id="tab0MathDeterminant"></div>
+          <div class="math-pill" id="tab0MathMagnitudes"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: Lines & Skew Distances -->
+    <div id="tab-1" class="tab-content">
+      <div class="viewport-pane">
+        <canvas id="canvasTab1"></canvas>
+        <div class="canvas-hud">
+          <div class="hud-stat"><span class="hud-dot" style="background:#06b6d4;"></span> Line 1 ($l_1$): <span id="hudLine1"></span></div>
+          <div class="hud-stat"><span class="hud-dot" style="background:#a855f7;"></span> Line 2 ($l_2$): <span id="hudLine2"></span></div>
+          <div class="hud-stat"><span class="hud-dot" style="background:#f59e0b;"></span> Shortest Bridge: <b id="hudSkewDist"></b></div>
+        </div>
+        <div class="canvas-controls">
+          <button class="icon-btn" onclick="resetCamera(1)">🔄 Reset View</button>
+          <button class="icon-btn" onclick="toggleSkewAnimation()">⏯️ Trace Parameter</button>
+        </div>
+      </div>
+
+      <div class="sidebar-pane">
+        <div class="card">
+          <div class="card-title"><span>🌟 Preset Line Scenarios</span></div>
+          <div class="preset-pills">
+            <button class="pill active" onclick="loadSkewPreset(0)">Ex 6.8 Perpendicular Bridge</button>
+            <button class="pill" onclick="loadSkewPreset(1)">Ex 6.5 Point to Line</button>
+            <button class="pill" onclick="loadSkewPreset(2)">Ex 6.7 Intersecting Lines (d=0)</button>
+            <button class="pill" onclick="loadSkewPreset(3)">Ex 6B Q6 Skew Lines</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span>🎛️ Interactive Line Controls</span></div>
+          <div class="control-row">
+            <label>Line 1 Parameter ($s$)</label>
+            <input type="range" id="paramS" min="-3" max="3" step="0.1" value="-0.33" oninput="updateLineParams()">
+            <span class="val-display" id="paramSVal">-0.33</span>
+          </div>
+          <div class="control-row">
+            <label>Line 2 Parameter ($t$)</label>
+            <input type="range" id="paramT" min="-3" max="3" step="0.1" value="1.0" oninput="updateLineParams()">
+            <span class="val-display" id="paramTVal">1.00</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span id="tab1ExplTitle">Shortest Distance Mechanism</span></div>
+          <div id="tab1ExplBody"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span>📐 Cambridge Mathematical Steps</span></div>
+          <div class="step-item">
+            <div class="step-label">[M1] Common Normal Direction</div>
+            <div class="step-desc" id="tab1StepNormal"></div>
+          </div>
+          <div class="step-item">
+            <div class="step-label">[M1/A1] Scalar Projection Formula</div>
+            <div class="step-desc" id="tab1StepFormula"></div>
+          </div>
+          <div class="step-item">
+            <div class="step-label">[A1] Exact Distance & Contact Points</div>
+            <div class="step-desc" id="tab1StepResult"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: Planes, Angles & Intersections -->
+    <div id="tab-2" class="tab-content">
+      <div class="viewport-pane">
+        <canvas id="canvasTab2"></canvas>
+        <div class="canvas-hud">
+          <div class="hud-stat"><span class="hud-dot" style="background:#06b6d4;"></span> Plane 1 ($\Pi_1$): <span id="hudPlane1"></span></div>
+          <div class="hud-stat"><span class="hud-dot" style="background:#ec4899;"></span> Plane 2 ($\Pi_2$): <span id="hudPlane2"></span></div>
+          <div class="hud-stat"><span class="hud-dot" style="background:#10b981;"></span> Acute Angle: <b id="hudPlaneAngle"></b></div>
+        </div>
+        <div class="canvas-controls">
+          <button class="icon-btn" onclick="resetCamera(2)">🔄 Reset View</button>
+          <button class="icon-btn" onclick="toggleNormalsDisplay()">📍 Toggle Normals</button>
+        </div>
+      </div>
+
+      <div class="sidebar-pane">
+        <div class="card">
+          <div class="card-title"><span>🌟 Preset Plane Configurations</span></div>
+          <div class="preset-pills">
+            <button class="pill active" onclick="loadPlanePreset(0)">Ex 6.11 Line of Intersection</button>
+            <button class="pill" onclick="loadPlanePreset(1)">Ex 6.9 Plane from 3 Points</button>
+            <button class="pill" onclick="loadPlanePreset(2)">Ex 6.14 Line Meeting Plane</button>
+            <button class="pill" onclick="loadPlanePreset(3)">Ex 6.15 Point to Plane</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span>🎛️ Plane 1 Equation: $a_1 x + b_1 y + c_1 z = d_1$</span></div>
+          <div class="control-row"><label>a₁</label><input type="range" id="p1a" min="-4" max="4" step="1" value="1" oninput="updatePlaneParams()"><span class="val-display" id="p1aVal">1</span></div>
+          <div class="control-row"><label>b₁</label><input type="range" id="p1b" min="-4" max="4" step="1" value="3" oninput="updatePlaneParams()"><span class="val-display" id="p1bVal">3</span></div>
+          <div class="control-row"><label>c₁</label><input type="range" id="p1c" min="-4" max="4" step="1" value="-1" oninput="updatePlaneParams()"><span class="val-display" id="p1cVal">-1</span></div>
+          <div class="control-row"><label>d₁</label><input type="range" id="p1d" min="-10" max="10" step="1" value="1" oninput="updatePlaneParams()"><span class="val-display" id="p1dVal">1</span></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span id="tab2ExplTitle">Planes Intuition</span></div>
+          <div id="tab2ExplBody"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span>📐 Line of Intersection & Angle</span></div>
+          <div class="math-pill" id="tab2MathAngle"></div>
+          <div class="math-pill" id="tab2MathIntersection"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: Past Paper Challenges & Step-by-Step Solver -->
+    <div id="tab-3" class="tab-content">
+      <div class="viewport-pane">
+        <canvas id="canvasTab3"></canvas>
+        <div class="canvas-hud">
+          <div class="hud-stat">Selected Past Paper Question: <b id="hudPastPaperTitle">Nov 2008 P1 Q11</b></div>
+          <div class="hud-stat">Active Step: <span id="hudActiveStep" style="color:var(--accent-amber);">1 of 3</span></div>
+        </div>
+        <div class="canvas-controls">
+          <button class="icon-btn" onclick="resetCamera(3)">🔄 Reset View</button>
+        </div>
+      </div>
+
+      <div class="sidebar-pane">
+        <div class="card">
+          <div class="card-title"><span>📜 Cambridge 9231 Past Paper Questions</span></div>
+          <div class="preset-pills">
+            <button class="pill active" onclick="loadPastPaper(0)">Nov 2008 P1 Q11 (Planes & Distances)</button>
+            <button class="pill" onclick="loadPastPaper(1)">June 2015 P11 Q11 (Perp Bridge & Tetrahedron)</button>
+            <button class="pill" onclick="loadPastPaper(2)">June 2016 P11 Q8 (3 Points to Plane)</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span>📝 Official Question Statement</span></div>
+          <div id="pastPaperPrompt" style="font-size:0.85rem; line-height:1.5; color:var(--text-muted);"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span>🎯 Step-by-Step Interactive Solution</span></div>
+          <div id="pastPaperSolution"></div>
+          <div style="display:flex; gap:8px; margin-top:12px;">
+            <button class="icon-btn" style="flex:1;" onclick="prevPastPaperStep()">⬅️ Previous Step</button>
+            <button class="icon-btn" style="flex:1; background:var(--accent-blue);" onclick="nextPastPaperStep()">Next Step ➡️</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    /* =========================================================================
+       GLOBAL APP STATE & CONFIG
+       ========================================================================= */
+    const state = {
+      appMode: 'exam', // 'eli6' or 'exam'
+      snapEnabled: true,
+      currentTab: 0,
+      
+      // Tab 0: Cross Product
+      tab0: {
+        a: { x: 2, y: 3, z: 1 },
+        b: { x: -1, y: 4, z: 2 },
+        c: { x: 3, y: 1, z: 4 }, // For tetrahedron
+        showShape: 'parallelogram', // 'parallelogram', 'triangle', 'tetrahedron'
+      },
+
+      // Tab 1: Lines & Skew
+      tab1: {
+        line1: { a: { x: 2, y: 3, z: 0 }, b: { x: -1, y: 2, z: 1 } },
+        line2: { a: { x: 3, y: 1, z: 0 }, b: { x: -1, y: 1, z: 0 } },
+        s: -0.333,
+        t: 1.0,
+        isAnimating: false
+      },
+
+      // Tab 2: Planes
+      tab2: {
+        p1: { a: 1, b: 3, c: -1, d: 1 },
+        p2: { a: 2, b: 4, c: 1, d: 6 },
+        showNormals: true
+      },
+
+      // Tab 3: Past Papers
+      tab3: {
+        paperIndex: 0,
+        currentStep: 0
+      },
+
+      // 3D Cameras per tab
+      cameras: [
+        { rotX: 0.4, rotY: -0.6, zoom: 32 },
+        { rotX: 0.35, rotY: -0.7, zoom: 28 },
+        { rotX: 0.45, rotY: -0.55, zoom: 24 },
+        { rotX: 0.4, rotY: -0.65, zoom: 26 }
+      ]
+    };
+
+    /* =========================================================================
+       MATHEMATICAL HELPER FUNCTIONS (3D Vector Algebra)
+       ========================================================================= */
+    function vecAdd(u, v) { return { x: u.x + v.x, y: u.y + v.y, z: u.z + v.z }; }
+    function vecSub(u, v) { return { x: u.x - v.x, y: u.y - v.y, z: u.z - v.z }; }
+    function vecScale(u, s) { return { x: u.x * s, y: u.y * s, z: u.z * s }; }
+    function vecDot(u, v) { return u.x * v.x + u.y * v.y + u.z * v.z; }
+    function vecMag(u) { return Math.sqrt(vecDot(u, u)); }
+    function vecCross(u, v) {
+      return {
+        x: u.y * v.z - u.z * v.y,
+        y: u.z * v.x - u.x * v.z,
+        z: u.x * v.y - u.y * v.x
+      };
+    }
+    function vecNormalize(u) {
+      const m = vecMag(u);
+      return m > 0.00001 ? vecScale(u, 1 / m) : { x: 0, y: 0, z: 0 };
+    }
+
+    function roundVal(v, decimals = 2) {
+      const factor = Math.pow(10, decimals);
+      return Math.round(v * factor) / factor;
+    }
+
+    function renderLatex(elementId, latexStr) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      try {
+        katex.render(latexStr, el, { throwOnError: false, displayMode: false });
+      } catch (err) {
+        el.textContent = latexStr;
+      }
+    }
+
+    /* =========================================================================
+       3D CANVAS ENGINE & PROJECTION (HiDPI Aware)
+       ========================================================================= */
+    function setupHiDPICanvas(canvas) {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      if (canvas.width !== rect.width * dpr || canvas.height !== rect.height * dpr) {
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+      }
+      const ctx = canvas.getContext('2d');
+      ctx.resetTransform();
+      ctx.scale(dpr, dpr);
+      return { ctx, width: rect.width, height: rect.height };
+    }
+
+    function project3D(point, cam, width, height) {
+      // Rotation around Y then X
+      const cosY = Math.cos(cam.rotY), sinY = Math.sin(cam.rotY);
+      const cosX = Math.cos(cam.rotX), sinX = Math.sin(cam.rotX);
+
+      // Y-axis rotation
+      const x1 = point.x * cosY + point.z * sinY;
+      const y1 = point.y;
+      const z1 = -point.x * sinY + point.z * cosY;
+
+      // X-axis rotation
+      const x2 = x1;
+      const y2 = y1 * cosX - z1 * sinX;
+      const z2 = y1 * sinX + z1 * cosX;
+
+      // Perspective scale
+      const dist = 28;
+      const fov = cam.zoom * (dist / (dist + z2));
+      const screenX = width / 2 + x2 * fov;
+      const screenY = height / 2 - y2 * fov;
+
+      return { x: screenX, y: screenY, z: z2 };
+    }
+
+    function drawAxes(ctx, cam, width, height) {
+      const origin = project3D({ x: 0, y: 0, z: 0 }, cam, width, height);
+      const axes = [
+        { pt: { x: 7, y: 0, z: 0 }, label: 'x', col: 'rgba(244,63,94,0.6)' },
+        { pt: { x: 0, y: 7, z: 0 }, label: 'y', col: 'rgba(16,185,129,0.6)' },
+        { pt: { x: 0, y: 0, z: 7 }, label: 'z', col: 'rgba(59,130,246,0.6)' }
+      ];
+
+      // Subtle reference grid in XY plane
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      for (let i = -6; i <= 6; i += 2) {
+        const pA = project3D({ x: i, y: -6, z: 0 }, cam, width, height);
+        const pB = project3D({ x: i, y: 6, z: 0 }, cam, width, height);
+        ctx.beginPath(); ctx.moveTo(pA.x, pA.y); ctx.lineTo(pB.x, pB.y); ctx.stroke();
+
+        const pC = project3D({ x: -6, y: i, z: 0 }, cam, width, height);
+        const pD = project3D({ x: 6, y: i, z: 0 }, cam, width, height);
+        ctx.beginPath(); ctx.moveTo(pC.x, pC.y); ctx.lineTo(pD.x, pD.y); ctx.stroke();
+      }
+
+      axes.forEach(ax => {
+        const p = project3D(ax.pt, cam, width, height);
+        ctx.strokeStyle = ax.col;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(origin.x, origin.y);
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+
+        ctx.fillStyle = ax.col;
+        ctx.font = 'bold 12px sans-serif';
+        ctx.fillText(ax.label, p.x + 4, p.y - 4);
+      });
+    }
+
+    function draw3DVector(ctx, from, to, color, cam, width, height, label = '') {
+      const p1 = project3D(from, cam, width, height);
+      const p2 = project3D(to, cam, width, height);
+
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 3;
+
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.stroke();
+
+      // Arrowhead
+      const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+      const headLen = 10;
+      ctx.beginPath();
+      ctx.moveTo(p2.x, p2.y);
+      ctx.lineTo(p2.x - headLen * Math.cos(angle - Math.PI / 6), p2.y - headLen * Math.sin(angle - Math.PI / 6));
+      ctx.lineTo(p2.x - headLen * Math.cos(angle + Math.PI / 6), p2.y - headLen * Math.sin(angle + Math.PI / 6));
+      ctx.closePath();
+      ctx.fill();
+
+      if (label) {
+        ctx.font = 'bold 13px monospace';
+        ctx.fillText(label, p2.x + 8, p2.y + 4);
+      }
+    }
+
+    /* =========================================================================
+       MOUSE / TOUCH INTERACTION FOR 3D ROTATION & ZOOM
+       ========================================================================= */
+    function attachCanvasControls(canvasId, tabIdx) {
+      const canvas = document.getElementById(canvasId);
+      let isDragging = false;
+      let lastX = 0, lastY = 0;
+
+      canvas.addEventListener('mousedown', e => {
+        isDragging = true;
+        lastX = e.clientX;
+        lastY = e.clientY;
+      });
+
+      window.addEventListener('mousemove', e => {
+        if (!isDragging || state.currentTab !== tabIdx) return;
+        const dx = e.clientX - lastX;
+        const dy = e.clientY - lastY;
+        lastX = e.clientX;
+        lastY = e.clientY;
+
+        const cam = state.cameras[tabIdx];
+        cam.rotY += dx * 0.008;
+        cam.rotX += dy * 0.008;
+        cam.rotX = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, cam.rotX));
+        renderCurrentTab();
+      });
+
+      window.addEventListener('mouseup', () => { isDragging = false; });
+
+      canvas.addEventListener('wheel', e => {
+        e.preventDefault();
+        const cam = state.cameras[tabIdx];
+        cam.zoom -= e.deltaY * 0.03;
+        cam.zoom = Math.max(12, Math.min(70, cam.zoom));
+        renderCurrentTab();
+      }, { passive: false });
+    }
+
+    function resetCamera(tabIdx) {
+      state.cameras[tabIdx] = { rotX: 0.4, rotY: -0.6, zoom: 30 };
+      renderCurrentTab();
+    }
+
+    /* =========================================================================
+       TAB 0: VECTOR CROSS PRODUCT & AREAS ENGINE
+       ========================================================================= */
+    function updateCrossParams() {
+      const ax = parseFloat(document.getElementById('ax').value);
+      const ay = parseFloat(document.getElementById('ay').value);
+      const az = parseFloat(document.getElementById('az').value);
+      const bx = parseFloat(document.getElementById('bx').value);
+      const by = parseFloat(document.getElementById('by').value);
+      const bz = parseFloat(document.getElementById('bz').value);
+
+      state.tab0.a = { x: ax, y: ay, z: az };
+      state.tab0.b = { x: bx, y: by, z: bz };
+
+      document.getElementById('axVal').textContent = ax;
+      document.getElementById('ayVal').textContent = ay;
+      document.getElementById('azVal').textContent = az;
+      document.getElementById('bxVal').textContent = bx;
+      document.getElementById('byVal').textContent = by;
+      document.getElementById('bzVal').textContent = bz;
+
+      renderTab0();
+    }
+
+    function toggleShapeTab0() {
+      const modes = ['parallelogram', 'triangle', 'tetrahedron'];
+      const curIdx = modes.indexOf(state.tab0.showShape);
+      state.tab0.showShape = modes[(curIdx + 1) % modes.length];
+      document.getElementById('shapeLabel0').textContent = 
+        state.tab0.showShape.charAt(0).toUpperCase() + state.tab0.showShape.slice(1);
+      renderTab0();
+    }
+
+    function loadCrossPreset(idx) {
+      document.querySelectorAll('#tab-0 .pill').forEach((p, i) => p.classList.toggle('active', i === idx));
+      if (idx === 0) { // Worked Ex 6.1 (a)
+        state.tab0.a = { x: -4, y: 2, z: 1 };
+        state.tab0.b = { x: 3, y: 0, z: -7 };
+        state.tab0.showShape = 'parallelogram';
+      } else if (idx === 1) { // Worked Ex 6.2 (Triangle)
+        // Vector AB = (1,4,8), Vector AC = (-4, 2, 9)
+        state.tab0.a = { x: 1, y: 4, z: 8 };
+        state.tab0.b = { x: -5, y: -2, z: 1 };
+        state.tab0.showShape = 'triangle';
+      } else if (idx === 2) { // Worked Ex 6.3 (Tetrahedron OABC)
+        state.tab0.a = { x: 1, y: 2, z: 2 };
+        state.tab0.b = { x: 3, y: -4, z: 1 };
+        state.tab0.c = { x: 6, y: -2, z: -1 };
+        state.tab0.showShape = 'tetrahedron';
+      } else if (idx === 3) { // Right Hand Rule Demo
+        state.tab0.a = { x: 3, y: 0, z: 0 };
+        state.tab0.b = { x: 0, y: 3, z: 0 };
+        state.tab0.showShape = 'parallelogram';
+      }
+
+      document.getElementById('ax').value = state.tab0.a.x;
+      document.getElementById('ay').value = state.tab0.a.y;
+      document.getElementById('az').value = state.tab0.a.z;
+      document.getElementById('bx').value = state.tab0.b.x;
+      document.getElementById('by').value = state.tab0.b.y;
+      document.getElementById('bz').value = state.tab0.b.z;
+      document.getElementById('shapeLabel0').textContent = 
+        state.tab0.showShape.charAt(0).toUpperCase() + state.tab0.showShape.slice(1);
+
+      updateCrossParams();
+    }
+
+    function renderTab0() {
+      const canvas = document.getElementById('canvasTab0');
+      const { ctx, width, height } = setupHiDPICanvas(canvas);
+      ctx.clearRect(0, 0, width, height);
+
+      const cam = state.cameras[0];
+      drawAxes(ctx, cam, width, height);
+
+      const a = state.tab0.a;
+      const b = state.tab0.b;
+      const cross = vecCross(a, b);
+      const crossMag = vecMag(cross);
+      const origin = { x: 0, y: 0, z: 0 };
+
+      // Draw Parallelogram / Triangle fill
+      const pO = project3D(origin, cam, width, height);
+      const pA = project3D(a, cam, width, height);
+      const pB = project3D(b, cam, width, height);
+      const pAB = project3D(vecAdd(a, b), cam, width, height);
+
+      if (state.tab0.showShape === 'parallelogram') {
+        ctx.fillStyle = 'rgba(245, 158, 11, 0.25)';
+        ctx.strokeStyle = 'rgba(245, 158, 11, 0.8)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(pO.x, pO.y);
+        ctx.lineTo(pA.x, pA.y);
+        ctx.lineTo(pAB.x, pAB.y);
+        ctx.lineTo(pB.x, pB.y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      } else if (state.tab0.showShape === 'triangle') {
+        ctx.fillStyle = 'rgba(16, 185, 129, 0.3)';
+        ctx.strokeStyle = 'rgba(16, 185, 129, 0.9)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(pO.x, pO.y);
+        ctx.lineTo(pA.x, pA.y);
+        ctx.lineTo(pB.x, pB.y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      } else if (state.tab0.showShape === 'tetrahedron') {
+        const c = state.tab0.c;
+        const pC = project3D(c, cam, width, height);
+        draw3DVector(ctx, origin, c, '#a855f7', cam, width, height, 'c');
+
+        // Draw Tetrahedron translucent faces
+        ctx.fillStyle = 'rgba(168, 85, 247, 0.2)';
+        ctx.strokeStyle = 'rgba(168, 85, 247, 0.6)';
+        ctx.lineWidth = 1.5;
+        
+        // Face OAB
+        ctx.beginPath(); ctx.moveTo(pO.x, pO.y); ctx.lineTo(pA.x, pA.y); ctx.lineTo(pB.x, pB.y); ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Face OAC
+        ctx.beginPath(); ctx.moveTo(pO.x, pO.y); ctx.lineTo(pA.x, pA.y); ctx.lineTo(pC.x, pC.y); ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Face OBC
+        ctx.beginPath(); ctx.moveTo(pO.x, pO.y); ctx.lineTo(pB.x, pB.y); ctx.lineTo(pC.x, pC.y); ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Face ABC
+        ctx.beginPath(); ctx.moveTo(pA.x, pA.y); ctx.lineTo(pB.x, pB.y); ctx.lineTo(pC.x, pC.y); ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+
+      // Draw vectors a, b, and cross product n
+      draw3DVector(ctx, origin, a, '#f43f5e', cam, width, height, 'a');
+      draw3DVector(ctx, origin, b, '#3b82f6', cam, width, height, 'b');
+
+      // Scale down normal vector if huge so it fits in viewport
+      const normalScale = crossMag > 6 ? 6 / crossMag : 1;
+      const displayCross = vecScale(cross, normalScale);
+      draw3DVector(ctx, origin, displayCross, '#10b981', cam, width, height, 'a × b');
+
+      // Update HUD & Text
+      document.getElementById('hudVecA').textContent = `(${a.x}, ${a.y}, ${a.z})`;
+      document.getElementById('hudVecB').textContent = `(${b.x}, ${b.y}, ${b.z})`;
+      document.getElementById('hudVecN').textContent = `(${cross.x}, ${cross.y}, ${cross.z})`;
+      document.getElementById('hudAreaPara').textContent = roundVal(crossMag, 3);
+
+      // KaTeX math rendering
+      const detLatex = `\\mathbf{a} \\times \\mathbf{b} = \\begin{vmatrix} \\mathbf{i} & \\mathbf{j} & \\mathbf{k} \\\\ ${a.x} & ${a.y} & ${a.z} \\\\ ${b.x} & ${b.y} & ${b.z} \\end{vmatrix} = (${cross.x})\\mathbf{i} - (${-cross.y})\\mathbf{j} + (${cross.z})\\mathbf{k}`;
+      renderLatex('tab0MathDeterminant', detLatex);
+
+      const areaTri = crossMag / 2;
+      let magLatex = `|\\mathbf{a} \\times \\mathbf{b}| = \\sqrt{(${cross.x})^2 + (${cross.y})^2 + (${cross.z})^2} = ${roundVal(crossMag, 3)}`;
+      if (state.tab0.showShape === 'triangle') {
+        magLatex += `\\implies \\text{Area}(\\triangle) = \\frac{1}{2}|\\mathbf{a} \\times \\mathbf{b}| = ${roundVal(areaTri, 3)}`;
+      } else if (state.tab0.showShape === 'tetrahedron') {
+        const c = state.tab0.c;
+        const triple = Math.abs(vecDot(cross, c));
+        const vol = triple / 6;
+        magLatex += `\\implies \\text{Vol} = \\frac{1}{6}|(\\mathbf{a} \\times \\mathbf{b}) \\cdot \\mathbf{c}| = \\frac{1}{6}(${roundVal(triple, 2)}) = ${roundVal(vol, 3)}`;
+      }
+      renderLatex('tab0MathMagnitudes', magLatex);
+
+      // Mode Explanation text
+      const isEli6 = state.appMode === 'eli6';
+      document.getElementById('tab0ExplTitle').textContent = isEli6 
+        ? "👶 The Magic Laser Pointer & Tile Area" 
+        : "🎓 Syllabus Spec: Vector Product & Common Perpendicular";
+
+      document.getElementById('tab0ExplBody').className = isEli6 ? 'eli6-box' : 'exam-box';
+      document.getElementById('tab0ExplBody').innerHTML = isEli6
+        ? `<b>The Superhero Right Hand:</b> Imagine point <b>a</b> is your index finger and <b>b</b> is your middle finger! Point <b>a × b</b> is your thumb sticking straight up into the sky, pointing exactly 90° away from both fingers at the same time!<br><br>
+           <b>The Carpet Area:</b> The length of that thumb laser tells you exactly how many square toy tiles fit inside the diamond floor spread out between <b>a</b> and <b>b</b>!`
+        : `<b>Key Result:</b> $\\mathbf{a} \\times \\mathbf{b} = |\\mathbf{a}||\\mathbf{b}|\\sin\\theta \\,\\mathbf{\\hat{n}}$ yields a vector perpendicular to the plane containing $\\mathbf{a}$ and $\\mathbf{b}$.<br>
+           • <b>Parallelogram Area:</b> $|\\mathbf{a} \\times \\mathbf{b}|$<br>
+           • <b>Triangle Area:</b> $\\frac{1}{2}|\\mathbf{a} \\times \\mathbf{b}|$<br>
+           • <b>Tetrahedron Volume:</b> $\\frac{1}{6}|(\\mathbf{a} \\times \\mathbf{b}) \\cdot \\mathbf{c}|$ via scalar triple product.`;
+    }
+
+    /* =========================================================================
+       TAB 1: SKEW LINES & SHORTEST DISTANCE ENGINE
+       ========================================================================= */
+    function updateLineParams() {
+      state.tab1.s = parseFloat(document.getElementById('paramS').value);
+      state.tab1.t = parseFloat(document.getElementById('paramT').value);
+      document.getElementById('paramSVal').textContent = roundVal(state.tab1.s, 2);
+      document.getElementById('paramTVal').textContent = roundVal(state.tab1.t, 2);
+      renderTab1();
+    }
+
+    function loadSkewPreset(idx) {
+      document.querySelectorAll('#tab-1 .pill').forEach((p, i) => p.classList.toggle('active', i === idx));
+      if (idx === 0) { // Worked Ex 6.8 (Perpendicular Bridge)
+        state.tab1.line1 = { a: { x: 2, y: 3, z: 0 }, b: { x: -1, y: 2, z: 1 } };
+        state.tab1.line2 = { a: { x: 3, y: 1, z: 0 }, b: { x: -1, y: 1, z: 0 } };
+        state.tab1.s = -1 / 3;
+        state.tab1.t = 1.0;
+      } else if (idx === 1) { // Worked Ex 6.5 (Point to Line)
+        state.tab1.line1 = { a: { x: 4, y: 4, z: 5 }, b: { x: 1, y: 1, z: 1 } };
+        state.tab1.line2 = { a: { x: 2, y: 1, z: 4 }, b: { x: 0, y: 0, z: 0 } }; // degenerate single point
+        state.tab1.s = -2;
+        state.tab1.t = 0;
+      } else if (idx === 2) { // Worked Ex 6.7 (Intersecting, d=0)
+        state.tab1.line1 = { a: { x: 2, y: 0, z: 3 }, b: { x: -1, y: -1, z: 1 } };
+        state.tab1.line2 = { a: { x: 1, y: -1, z: 2 }, b: { x: 0, y: 0, z: 2 } };
+        state.tab1.s = 1;
+        state.tab1.t = 1;
+      } else if (idx === 3) { // Ex 6B Q6
+        state.tab1.line1 = { a: { x: 1, y: -2, z: 3 }, b: { x: 4, y: -1, z: 0 } };
+        state.tab1.line2 = { a: { x: 3, y: 0, z: -5 }, b: { x: 1, y: 4, z: 3 } };
+        state.tab1.s = 0.5;
+        state.tab1.t = -0.5;
+      }
+
+      document.getElementById('paramS').value = state.tab1.s;
+      document.getElementById('paramT').value = state.tab1.t;
+      updateLineParams();
+    }
+
+    function toggleSkewAnimation() {
+      state.tab1.isAnimating = !state.tab1.isAnimating;
+      if (state.tab1.isAnimating) animateSkew();
+    }
+
+    function animateSkew() {
+      if (!state.tab1.isAnimating || state.currentTab !== 1) return;
+      state.tab1.s = (state.tab1.s + 0.02);
+      if (state.tab1.s > 2) state.tab1.s = -2;
+      document.getElementById('paramS').value = state.tab1.s;
+      document.getElementById('paramSVal').textContent = roundVal(state.tab1.s, 2);
+      renderTab1();
+      requestAnimationFrame(animateSkew);
+    }
+
+    function renderTab1() {
+      const canvas = document.getElementById('canvasTab1');
+      const { ctx, width, height } = setupHiDPICanvas(canvas);
+      ctx.clearRect(0, 0, width, height);
+
+      const cam = state.cameras[1];
+      drawAxes(ctx, cam, width, height);
+
+      const l1 = state.tab1.line1;
+      const l2 = state.tab1.line2;
+
+      // Draw continuous lines l1 and l2
+      function drawInfiniteLine(line, color) {
+        const pStart = project3D(vecAdd(line.a, vecScale(line.b, -8)), cam, width, height);
+        const pEnd = project3D(vecAdd(line.a, vecScale(line.b, 8)), cam, width, height);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(pStart.x, pStart.y);
+        ctx.lineTo(pEnd.x, pEnd.y);
+        ctx.stroke();
+      }
+
+      drawInfiniteLine(l1, '#06b6d4');
+      drawInfiniteLine(l2, '#a855f7');
+
+      // Contact points P on l1 and Q on l2 based on current sliders
+      const ptP = vecAdd(l1.a, vecScale(l1.b, state.tab1.s));
+      const ptQ = vecAdd(l2.a, vecScale(l2.b, state.tab1.t));
+
+      // Draw current probe bridge
+      const pProjP = project3D(ptP, cam, width, height);
+      const pProjQ = project3D(ptQ, cam, width, height);
+
+      ctx.strokeStyle = 'rgba(245, 158, 11, 0.4)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(pProjP.x, pProjP.y);
+      ctx.lineTo(pProjQ.x, pProjQ.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Compute theoretical optimal shortest perpendicular bridge:
+      const bCross = vecCross(l1.b, l2.b);
+      const bCrossMag = vecMag(bCross);
+      const aDiff = vecSub(l2.a, l1.a);
+      let theoreticalDist = 0;
+
+      if (bCrossMag > 0.0001) {
+        theoreticalDist = Math.abs(vecDot(aDiff, bCross)) / bCrossMag;
+      }
+
+      // Draw theoretical perpendicular contact points if solved
+      // Solve system: (ptP - ptQ) . b1 = 0 and (ptP - ptQ) . b2 = 0
+      const d11 = vecDot(l1.b, l1.b);
+      const d12 = -vecDot(l1.b, l2.b);
+      const d21 = vecDot(l1.b, l2.b);
+      const d22 = -vecDot(l2.b, l2.b);
+      const rhs1 = -vecDot(vecSub(l1.a, l2.a), l1.b);
+      const rhs2 = -vecDot(vecSub(l1.a, l2.a), l2.b);
+
+      const det = d11 * d22 - d12 * d21;
+      let optP = ptP, optQ = ptQ;
+      if (Math.abs(det) > 0.0001) {
+        const sOpt = (rhs1 * d22 - rhs2 * d12) / det;
+        const tOpt = (d11 * rhs2 - d21 * rhs1) / det;
+        optP = vecAdd(l1.a, vecScale(l1.b, sOpt));
+        optQ = vecAdd(l2.a, vecScale(l2.b, tOpt));
+
+        const optProjP = project3D(optP, cam, width, height);
+        const optProjQ = project3D(optQ, cam, width, height);
+
+        // Glowing shortest connector
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(optProjP.x, optProjP.y);
+        ctx.lineTo(optProjQ.x, optProjQ.y);
+        ctx.stroke();
+
+        // Marker dots
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath(); ctx.arc(optProjP.x, optProjP.y, 5, 0, 2*Math.PI); ctx.fill();
+        ctx.beginPath(); ctx.arc(optProjQ.x, optProjQ.y, 5, 0, 2*Math.PI); ctx.fill();
+      }
+
+      // HUD text
+      document.getElementById('hudLine1').textContent = `r = (${l1.a.x},${l1.a.y},${l1.a.z}) + (${l1.b.x},${l1.b.y},${l1.b.z})s`;
+      document.getElementById('hudLine2').textContent = `r = (${l2.a.x},${l2.a.y},${l2.a.z}) + (${l2.b.x},${l2.b.y},${l2.b.z})t`;
+      document.getElementById('hudSkewDist').textContent = roundVal(theoreticalDist, 3);
+
+      // Step text
+      renderLatex('tab1StepNormal', `\\mathbf{b}_1 \\times \\mathbf{b}_2 = (${bCross.x})\\mathbf{i} + (${bCross.y})\\mathbf{j} + (${bCross.z})\\mathbf{k}`);
+      renderLatex('tab1StepFormula', `d = \\frac{|(\\mathbf{a}_2 - \\mathbf{a}_1) \\cdot (\\mathbf{b}_1 \\times \\mathbf{b}_2)|}{|\\mathbf{b}_1 \\times \\mathbf{b}_2|} = \\frac{|${roundVal(vecDot(aDiff, bCross), 2)}|}{${roundVal(bCrossMag, 2)}}`);
+      renderLatex('tab1StepResult', `d_{\\min} = ${roundVal(theoreticalDist, 3)} \\quad P(${roundVal(optP.x, 2)}, ${roundVal(optP.y, 2)}, ${roundVal(optP.z, 2)}), \\; Q(${roundVal(optQ.x, 2)}, ${roundVal(optQ.y, 2)}, ${roundVal(optQ.z, 2)})`);
+
+      // Explanations
+      const isEli6 = state.appMode === 'eli6';
+      document.getElementById('tab1ExplTitle').textContent = isEli6 
+        ? "👶 The Two Flying Zip-lines & The Shortest Rope" 
+        : "🎓 Syllabus Spec: Skew Lines & Perpendicular Distance";
+
+      document.getElementById('tab1ExplBody').className = isEli6 ? 'eli6-box' : 'exam-box';
+      document.getElementById('tab1ExplBody').innerHTML = isEli6
+        ? `Imagine two zip-lines stretched across a playground in different directions that never touch each other!<br>
+           If you want to hang a single straight rope between them that is as <b>short as possible</b>, the rope must be completely upright at right-angles to <i>both</i> zip-lines at the same time! That's why the yellow bridge in the middle never wobbles!`
+        : `<b>Cambridge Theorem:</b> Two skew lines do not intersect and are not parallel. The vector connecting their closest points $P$ and $Q$ is parallel to the mutual perpendicular $\\mathbf{b}_1 \\times \\mathbf{b}_2$[cite: 6].<br>
+           • Distance Formula: $d = \\frac{|(\\mathbf{a}_2 - \\mathbf{a}_1) \\cdot (\\mathbf{b}_1 \\times \\mathbf{b}_2)|}{|\\mathbf{b}_1 \\times \\mathbf{b}_2|}$[cite: 6]<br>
+           • Contact points are obtained by enforcing $\\vec{PQ} \\cdot \\mathbf{b}_1 = 0$ and $\\vec{PQ} \\cdot \\mathbf{b}_2 = 0$[cite: 6].`;
+    }
+
+    /* =========================================================================
+       TAB 2: PLANES, INTERSECTIONS & ANGLES ENGINE
+       ========================================================================= */
+    function updatePlaneParams() {
+      state.tab2.p1.a = parseFloat(document.getElementById('p1a').value);
+      state.tab2.p1.b = parseFloat(document.getElementById('p1b').value);
+      state.tab2.p1.c = parseFloat(document.getElementById('p1c').value);
+      state.tab2.p1.d = parseFloat(document.getElementById('p1d').value);
+
+      document.getElementById('p1aVal').textContent = state.tab2.p1.a;
+      document.getElementById('p1bVal').textContent = state.tab2.p1.b;
+      document.getElementById('p1cVal').textContent = state.tab2.p1.c;
+      document.getElementById('p1dVal').textContent = state.tab2.p1.d;
+
+      renderTab2();
+    }
+
+    function toggleNormalsDisplay() {
+      state.tab2.showNormals = !state.tab2.showNormals;
+      renderTab2();
+    }
+
+    function loadPlanePreset(idx) {
+      document.querySelectorAll('#tab-2 .pill').forEach((p, i) => p.classList.toggle('active', i === idx));
+      if (idx === 0) { // Worked Ex 6.11 (Intersection of x+3y-z=1 and 2x+4y+z=6)
+        state.tab2.p1 = { a: 1, b: 3, c: -1, d: 1 };
+        state.tab2.p2 = { a: 2, b: 4, c: 1, d: 6 };
+      } else if (idx === 1) { // Worked Ex 6.9 (x + y - 6z = -9 and 2x - y + z = 3)
+        state.tab2.p1 = { a: 1, b: 1, c: -6, d: -9 };
+        state.tab2.p2 = { a: 2, b: -1, c: 1, d: 3 };
+      } else if (idx === 2) { // Worked Ex 6.14 (Angle line and plane 3x - y = 2)
+        state.tab2.p1 = { a: 3, b: -1, c: 0, d: 2 };
+        state.tab2.p2 = { a: 0, b: 1, c: 1, d: 4 };
+      } else if (idx === 3) { // Worked Ex 6.15 (Point to plane 4x + y - z = 12)
+        state.tab2.p1 = { a: 4, b: 1, c: -1, d: 12 };
+        state.tab2.p2 = { a: 1, b: 0, c: 2, d: 4 };
+      }
+
+      document.getElementById('p1a').value = state.tab2.p1.a;
+      document.getElementById('p1b').value = state.tab2.p1.b;
+      document.getElementById('p1c').value = state.tab2.p1.c;
+      document.getElementById('p1d').value = state.tab2.p1.d;
+      updatePlaneParams();
+    }
+
+    function renderTab2() {
+      const canvas = document.getElementById('canvasTab2');
+      const { ctx, width, height } = setupHiDPICanvas(canvas);
+      ctx.clearRect(0, 0, width, height);
+
+      const cam = state.cameras[2];
+      drawAxes(ctx, cam, width, height);
+
+      const p1 = state.tab2.p1;
+      const p2 = state.tab2.p2;
+
+      const n1 = { x: p1.a, y: p1.b, z: p1.c };
+      const n2 = { x: p2.a, y: p2.b, z: p2.c };
+
+      // Helper to draw a plane polygon patch
+      function drawPlanePatch(n, d, colorFill, colorStroke) {
+        // Find any point on plane
+        let p0 = { x: 0, y: 0, z: 0 };
+        if (Math.abs(n.z) > 0.001) p0.z = d / n.z;
+        else if (Math.abs(n.y) > 0.001) p0.y = d / n.y;
+        else if (Math.abs(n.x) > 0.001) p0.x = d / n.x;
+
+        // Find two orthogonal vectors in plane
+        let u = { x: -n.y, y: n.x, z: 0 };
+        if (vecMag(u) < 0.001) u = { x: 0, y: -n.z, z: n.y };
+        u = vecNormalize(u);
+        const v = vecNormalize(vecCross(n, u));
+
+        const size = 6;
+        const corners = [
+          vecAdd(p0, vecAdd(vecScale(u, -size), vecScale(v, -size))),
+          vecAdd(p0, vecAdd(vecScale(u, size), vecScale(v, -size))),
+          vecAdd(p0, vecAdd(vecScale(u, size), vecScale(v, size))),
+          vecAdd(p0, vecAdd(vecScale(u, -size), vecScale(v, size)))
+        ];
+
+        const pProj = corners.map(pt => project3D(pt, cam, width, height));
+
+        ctx.fillStyle = colorFill;
+        ctx.strokeStyle = colorStroke;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(pProj[0].x, pProj[0].y);
+        for (let i = 1; i < 4; i++) ctx.lineTo(pProj[i].x, pProj[i].y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        if (state.tab2.showNormals) {
+          const normPt = vecAdd(p0, vecScale(vecNormalize(n), 3));
+          draw3DVector(ctx, p0, normPt, colorStroke, cam, width, height, 'n');
+        }
+      }
+
+      drawPlanePatch(n1, p1.d, 'rgba(6, 182, 212, 0.2)', '#06b6d4');
+      drawPlanePatch(n2, p2.d, 'rgba(236, 72, 153, 0.2)', '#ec4899');
+
+      // Line of intersection calculation: direction = n1 x n2
+      const lineDir = vecCross(n1, n2);
+      const lineDirMag = vecMag(lineDir);
+
+      if (lineDirMag > 0.001) {
+        // Find point on line of intersection by setting x=0 or z=0
+        // e.g., if set z = 0: a1 x + b1 y = d1, a2 x + b2 y = d2
+        let pLine = { x: 0, y: 0, z: 0 };
+        const dXY = p1.a * p2.b - p1.b * p2.a;
+        const dYZ = p1.b * p2.c - p1.c * p2.b;
+        const dXZ = p1.a * p2.c - p1.c * p2.a;
+
+        if (Math.abs(dXY) > 0.001) {
+          pLine.x = (p1.d * p2.b - p2.d * p1.b) / dXY;
+          pLine.y = (p1.a * p2.d - p2.a * p1.d) / dXY;
+          pLine.z = 0;
+        } else if (Math.abs(dYZ) > 0.001) {
+          pLine.x = 0;
+          pLine.y = (p1.d * p2.c - p2.d * p1.c) / dYZ;
+          pLine.z = (p1.b * p2.d - p2.b * p1.d) / dYZ;
+        }
+
+        const pA = project3D(vecAdd(pLine, vecScale(lineDir, -6)), cam, width, height);
+        const pB = project3D(vecAdd(pLine, vecScale(lineDir, 6)), cam, width, height);
+
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.moveTo(pA.x, pA.y);
+        ctx.lineTo(pB.x, pB.y);
+        ctx.stroke();
+      }
+
+      // Acute angle calculation between normals
+      const cosTheta = Math.abs(vecDot(n1, n2)) / (vecMag(n1) * vecMag(n2));
+      const acuteRad = Math.acos(Math.min(1, Math.max(0, cosTheta)));
+      const acuteDeg = acuteRad * (180 / Math.PI);
+
+      document.getElementById('hudPlane1').textContent = `${p1.a}x + ${p1.b}y + ${p1.c}z = ${p1.d}`;
+      document.getElementById('hudPlane2').textContent = `${p2.a}x + ${p2.b}y + ${p2.c}z = ${p2.d}`;
+      document.getElementById('hudPlaneAngle').textContent = `${roundVal(acuteDeg, 1)}°`;
+
+      renderLatex('tab2MathAngle', `\\cos\\theta = \\frac{|\\mathbf{n}_1 \\cdot \\mathbf{n}_2|}{|\\mathbf{n}_1||\\mathbf{n}_2|} = \\frac{|${roundVal(vecDot(n1, n2), 1)}|}{${roundVal(vecMag(n1), 2)} \\times ${roundVal(vecMag(n2), 2)}} \\implies \\theta = ${roundVal(acuteDeg, 1)}^\\circ`);
+      renderLatex('tab2MathIntersection', `\\mathbf{b}_{\\text{line}} = \\mathbf{n}_1 \\times \\mathbf{n}_2 = (${lineDir.x})\\mathbf{i} + (${lineDir.y})\\mathbf{j} + (${lineDir.z})\\mathbf{k}`);
+
+      // Intuition Breakdown
+      const isEli6 = state.appMode === 'eli6';
+      document.getElementById('tab2ExplTitle').textContent = isEli6 
+        ? "👶 Two Giant Paper Sheets Crossing in the Air" 
+        : "🎓 Syllabus Spec: Planes, Normals & Intersection Lines";
+
+      document.getElementById('tab2ExplBody').className = isEli6 ? 'eli6-box' : 'exam-box';
+      document.getElementById('tab2ExplBody').innerHTML = isEli6
+        ? `Imagine holding two stiff cardboard sheets in the air[cite: 6]. When they bump into each other, they don't touch at just one single dot—they touch all along a straight crease or fold line[cite: 6]!<br><br>
+           The normal pins pointing straight out of the papers tell you exactly how tilted the sheets are relative to each other[cite: 6]!`
+        : `<b>Cambridge Key Concepts:</b><br>
+           • <b>Scalar Equation:</b> $\\mathbf{r} \\cdot \\mathbf{n} = \\mathbf{a} \\cdot \\mathbf{n} = d$[cite: 6]<br>
+           • <b>Angle between planes:</b> $\\cos\\theta = \\frac{|\\mathbf{n}_1 \\cdot \\mathbf{n}_2|}{|\\mathbf{n}_1||\\mathbf{n}_2|}$ (always verify acute vs. obtuse)[cite: 6]<br>
+           • <b>Line of Intersection:</b> Must be perpendicular to both plane normals $\\implies \\mathbf{b} = \\mathbf{n}_1 \\times \\mathbf{n}_2$[cite: 6]. Fix one variable (e.g. $z=0$) to determine a starting position vector[cite: 6].`;
+    }
+
+    /* =========================================================================
+       TAB 3: PAST PAPERS & STEP-BY-STEP EXAM CHALLENGES
+       ========================================================================= */
+    const pastPapersData = [
+      {
+        title: "Nov 2008 P1 Q11 (Planes, Bound on λ, & Angle)",
+        prompt: `The plane $\\Pi_1$ has equation $\\mathbf{r} = \\mathbf{i}+2\\mathbf{j}+\\mathbf{k} + \\theta(2\\mathbf{j}-\\mathbf{k}) + \\phi(3\\mathbf{i}+2\\mathbf{j}-2\\mathbf{k})$[cite: 6].<br>
+                 (i) Find a normal vector and show that $\\Pi_1$ is $2x+3y+6z=14$[cite: 6].<br>
+                 (ii) Point $P$ on line $l$ has parameter $\\lambda$. Find $\\lambda$ such that the perpendicular distance from $P$ to $\\Pi_1$ is $\\le 4$[cite: 6].<br>
+                 (iii) Find the acute angle between $\\Pi_1$ and $\\Pi_2$[cite: 6].`,
+        steps: [
+          {
+            label: "Step 1: Cross Product to find Normal n₁",
+            math: `\\mathbf{n}_1 = (2\\mathbf{j}-\\mathbf{k}) \\times (3\\mathbf{i}+2\\mathbf{j}-2\\mathbf{k}) = \\begin{vmatrix} \\mathbf{i} & \\mathbf{j} & \\mathbf{k} \\\\ 0 & 2 & -1 \\\\ 3 & 2 & -2 \\end{vmatrix} = -2\\mathbf{i}-3\\mathbf{j}-6\\mathbf{k} \\implies 2x+3y+6z=14`,
+            desc: "Taking the cross product of the two direction vectors in the plane gives the perpendicular normal[cite: 6]. Substituting the point (1,2,1) confirms the constant d = 14[cite: 6]."
+          },
+          {
+            label: "Step 2: Distance Bound on λ",
+            math: `P = (3+4\\lambda, 8+6\\lambda, 2+5\\lambda) \\implies \\left|\\frac{2(3+4\\lambda)+3(8+6\\lambda)+6(2+5\\lambda)-14}{\\sqrt{2^2+3^2+6^2}}\\right| \\le 4 \\implies |56\\lambda + 28| \\le 28 \\implies -1 \\le \\lambda \\le 0`,
+            desc: "Substitute the parametric point on the line into the perpendicular distance formula with |n| = 7[cite: 6]."
+          },
+          {
+            label: "Step 3: Angle Between Π₁ and Π₂",
+            math: `\\mathbf{n}_2 = (4\\mathbf{i}+6\\mathbf{j}+5\\mathbf{k}) \\times (2\\mathbf{i}+6\\mathbf{j}+\\mathbf{k}) = -24\\mathbf{i}+6\\mathbf{j}+12\\mathbf{k} \\implies \\cos\\theta = \\frac{|\\mathbf{n}_1 \\cdot \\mathbf{n}_2|}{|\\mathbf{n}_1||\\mathbf{n}_2|} = \\frac{1}{\\sqrt{21}} \\implies \\theta = 77.4^\\circ`,
+            desc: "The acute angle between the two planes equals the acute angle between their normal vectors[cite: 6]."
+          }
+        ]
+      },
+      {
+        title: "June 2015 P11 Q11 (Perpendicular Bridge & Tetrahedron)",
+        prompt: `Lines $l_1: \\mathbf{r} = (8,2,3) + \\lambda(1,-2,0)$ and $l_2: \\mathbf{r} = (5,3,-14) + \\mu(0,2,-3)$[cite: 6].<br>
+                 (i) Find position vectors of $P$ on $l_1$ and $Q$ on $l_2$ such that $PQ$ is perpendicular to both lines[cite: 6].<br>
+                 (ii) Find $\\vec{AP} \\times \\vec{AQ}$ and the volume of tetrahedron $APQB$[cite: 6].`,
+        steps: [
+          {
+            label: "Step 1: Simultaneous Dot Products",
+            math: `\\vec{PQ} = (5-\\lambda)\\mathbf{i} + (1+2\\lambda+2\\mu)\\mathbf{j} + (-17-3\\mu)\\mathbf{k} \\\\ \\vec{PQ} \\cdot \\mathbf{d}_1 = 0 \\implies 5\\lambda + 4\\mu = -3, \\quad \\vec{PQ} \\cdot \\mathbf{d}_2 = 0 \\implies 4\\lambda + 13\\mu = -49`,
+            desc: "Set up the mutual perpendicularity equations to solve for the unique contact parameters λ and μ[cite: 6]."
+          },
+          {
+            label: "Step 2: Solve Contact Points",
+            math: `\\lambda = 3, \\; \\mu = -5 \\implies P = (11, -4, 3), \\quad Q = (5, -7, 1)`,
+            desc: "Substitute the solved parameters back into the vector equations to find the exact endpoints of the shortest connector[cite: 6]."
+          },
+          {
+            label: "Step 3: Area of APQ & Tetrahedron Volume",
+            math: `\\vec{AP} \\times \\vec{AQ} = 36\\mathbf{i} + 18\\mathbf{j} + 27\\mathbf{k} \\implies \\text{Area} = \\frac{1}{2}|\\vec{AP} \\times \\vec{AQ}| = \\frac{9\\sqrt{29}}{2}, \\quad \\text{Vol} = \\frac{1}{6}|(\\vec{AP} \\times \\vec{AQ}) \\cdot \\vec{AB}| = 27`,
+            desc: "Using the vector cross product for the triangle base and the scalar triple product for the 3D tetrahedron volume[cite: 6]."
+          }
+        ]
+      },
+      {
+        title: "June 2016 P11 Q8 (3 Points to Cartesian Plane)",
+        prompt: `Plane $\\Pi_1$ passes through points $(2,-1,3), (4,2,-5), (-1,3,-2)$[cite: 6].<br>
+                 (i) Find the Cartesian equation of $\\Pi_1$[cite: 6].<br>
+                 (ii) Plane $\\Pi_2$ has equation $3x - y + 2z = 5$. Find the acute angle and line of intersection[cite: 6].`,
+        steps: [
+          {
+            label: "Step 1: Normal from Two Direction Vectors",
+            math: `\\mathbf{u} = (2, 3, -8), \\; \\mathbf{v} = (-3, 4, -5) \\implies \\mathbf{n}_1 = \\mathbf{u} \\times \\mathbf{v} = 17\\mathbf{i} + 34\\mathbf{j} + 17\\mathbf{k} \\propto (1, 2, 1)`,
+            desc: "Subtract the points to obtain two vectors within the plane, then compute their cross product to get the normal[cite: 6]."
+          },
+          {
+            label: "Step 2: Cartesian Equation & Angle",
+            math: `x + 2y + z = 3. \\quad \\cos\\theta = \\frac{|(1,2,1) \\cdot (3,-1,2)|}{\\sqrt{6}\\sqrt{14}} = \\frac{3}{\\sqrt{84}} \\implies \\theta = 70.9^\\circ`,
+            desc: "Substitute point (2,-1,3) to determine d=3[cite: 6]. Compute dot product of normals for the acute angle[cite: 6]."
+          },
+          {
+            label: "Step 3: Vector Equation of Intersection Line",
+            math: `\\mathbf{b} = \\mathbf{n}_1 \\times \\mathbf{n}_2 = (5, 1, -7) \\implies \\mathbf{r} = \\begin{pmatrix} 0 \\\\ 1/5 \\\\ 13/5 \\end{pmatrix} + t\\begin{pmatrix} 5 \\\\ 1 \\\\ -7 \\end{pmatrix}`,
+            desc: "The direction of the intersection line is n1 x n2[cite: 6]. Fix x=0 to find a common point[cite: 6]."
+          }
+        ]
+      }
+    ];
+
+    function loadPastPaper(idx) {
+      state.tab3.paperIndex = idx;
+      state.tab3.currentStep = 0;
+      document.querySelectorAll('#tab-3 .pill').forEach((p, i) => p.classList.toggle('active', i === idx));
+
+      const data = pastPapersData[idx];
+      document.getElementById('hudPastPaperTitle').textContent = data.title;
+      document.getElementById('pastPaperPrompt').innerHTML = data.prompt;
+      renderPastPaperStep();
+      renderTab3();
+    }
+
+    function renderPastPaperStep() {
+      const data = pastPapersData[state.tab3.paperIndex];
+      const step = data.steps[state.tab3.currentStep];
+      document.getElementById('hudActiveStep').textContent = `${state.tab3.currentStep + 1} of ${data.steps.length}`;
+
+      const container = document.getElementById('pastPaperSolution');
+      container.innerHTML = `
+        <div class="step-item">
+          <div class="step-label" style="color:var(--accent-amber);">${step.label}</div>
+          <div class="math-pill" id="pastPaperMath"></div>
+          <div class="step-desc" style="color:var(--text-main); margin-top:6px;">${step.desc}</div>
+        </div>
+      `;
+      renderLatex('pastPaperMath', step.math);
+    }
+
+    function nextPastPaperStep() {
+      const data = pastPapersData[state.tab3.paperIndex];
+      if (state.tab3.currentStep < data.steps.length - 1) {
+        state.tab3.currentStep++;
+        renderPastPaperStep();
+        renderTab3();
+      }
+    }
+
+    function prevPastPaperStep() {
+      if (state.tab3.currentStep > 0) {
+        state.tab3.currentStep--;
+        renderPastPaperStep();
+        renderTab3();
+      }
+    }
+
+    function renderTab3() {
+      const canvas = document.getElementById('canvasTab3');
+      const { ctx, width, height } = setupHiDPICanvas(canvas);
+      ctx.clearRect(0, 0, width, height);
+
+      const cam = state.cameras[3];
+      drawAxes(ctx, cam, width, height);
+
+      // Render custom 3D visuals depending on active past paper
+      if (state.tab3.paperIndex === 0) {
+        // Nov 2008 P1 Q11: Plane Pi1 and Line l
+        const p1 = { a: 2, b: 3, c: 6, d: 14 };
+        const n1 = { x: 2, y: 3, z: 6 };
+        const p0 = { x: 1, y: 2, z: 1 };
+
+        // Draw plane patch
+        const u = vecNormalize({ x: -3, y: 2, z: 0 });
+        const v = vecNormalize(vecCross(n1, u));
+        const corners = [
+          vecAdd(p0, vecAdd(vecScale(u, -6), vecScale(v, -6))),
+          vecAdd(p0, vecAdd(vecScale(u, 6), vecScale(v, -6))),
+          vecAdd(p0, vecAdd(vecScale(u, 6), vecScale(v, 6))),
+          vecAdd(p0, vecAdd(vecScale(u, -6), vecScale(v, 6)))
+        ].map(pt => project3D(pt, cam, width, height));
+
+        ctx.fillStyle = 'rgba(6, 182, 212, 0.2)';
+        ctx.strokeStyle = '#06b6d4';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(corners[0].x, corners[0].y);
+        corners.slice(1).forEach(c => ctx.lineTo(c.x, c.y));
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Draw Line l: r = (3,8,2) + t(4,6,5)
+        const lStart = project3D({ x: 3 - 4*1.5, y: 8 - 6*1.5, z: 2 - 5*1.5 }, cam, width, height);
+        const lEnd = project3D({ x: 3 + 4*0.8, y: 8 + 6*0.8, z: 2 + 5*0.8 }, cam, width, height);
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(lStart.x, lStart.y);
+        ctx.lineTo(lEnd.x, lEnd.y);
+        ctx.stroke();
+      } else if (state.tab3.paperIndex === 1) {
+        // June 2015 P11 Q11: Skew lines & contact points P and Q
+        const P = { x: 11, y: -4, z: 3 };
+        const Q = { x: 5, y: -7, z: 1 };
+        const pP = project3D(P, cam, width, height);
+        const pQ = project3D(Q, cam, width, height);
+
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(pP.x, pP.y);
+        ctx.lineTo(pQ.x, pQ.y);
+        ctx.stroke();
+
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath(); ctx.arc(pP.x, pP.y, 6, 0, 2*Math.PI); ctx.fill();
+        ctx.beginPath(); ctx.arc(pQ.x, pQ.y, 6, 0, 2*Math.PI); ctx.fill();
+
+        ctx.font = 'bold 12px sans-serif';
+        ctx.fillText('P (11, -4, 3)', pP.x + 8, pP.y);
+        ctx.fillText('Q (5, -7, 1)', pQ.x + 8, pQ.y);
+      }
+    }
+
+    /* =========================================================================
+       APPLICATION CONTROLS & TAB ROUTING
+       ========================================================================= */
+    function switchTab(idx) {
+      state.currentTab = idx;
+      document.querySelectorAll('.tab-item').forEach((item, i) => item.classList.toggle('active', i === idx));
+      document.querySelectorAll('.tab-content').forEach((pane, i) => pane.classList.toggle('active', i === idx));
+      renderCurrentTab();
+    }
+
+    function renderCurrentTab() {
+      if (state.currentTab === 0) renderTab0();
+      else if (state.currentTab === 1) renderTab1();
+      else if (state.currentTab === 2) renderTab2();
+      else if (state.currentTab === 3) renderTab3();
+    }
+
+    function setAppMode(mode) {
+      state.appMode = mode;
+      document.getElementById('modeEli6').classList.toggle('active', mode === 'eli6');
+      document.getElementById('modeExam').classList.toggle('active', mode === 'exam');
+      renderCurrentTab();
+    }
+
+    function toggleCoordinateSnap() {
+      state.snapEnabled = !state.snapEnabled;
+      const btn = document.getElementById('snapToggle');
+      const lbl = document.getElementById('snapState');
+      btn.classList.toggle('active', state.snapEnabled);
+      lbl.textContent = state.snapEnabled ? 'ON (Int)' : 'OFF';
+
+      const step = state.snapEnabled ? 1 : 0.2;
+      ['ax','ay','az','bx','by','bz','p1a','p1b','p1c','p1d'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.step = step;
+      });
+    }
+
+    // Window Resize Handler
+    window.addEventListener('resize', () => {
+      renderCurrentTab();
+    });
+
+    // Initialize all canvas events and initial content
+    window.addEventListener('DOMContentLoaded', () => {
+      attachCanvasControls('canvasTab0', 0);
+      attachCanvasControls('canvasTab1', 1);
+      attachCanvasControls('canvasTab2', 2);
+      attachCanvasControls('canvasTab3', 3);
+
+      loadCrossPreset(0);
+      loadSkewPreset(0);
+      loadPlanePreset(0);
+      loadPastPaper(0);
+
+      renderCurrentTab();
+    });
+  </script>
+</body>
+</html>

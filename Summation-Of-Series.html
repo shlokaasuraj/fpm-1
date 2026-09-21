@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Summation of Series: Intuitive Lab & Simulator</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- KaTeX for formula rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fdf4ff',
+              400: '#e879f9',
+              500: '#d946ef',
+              600: '#c026d3',
+              900: '#701a75',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .eli6-font {
+      font-family: 'Fredoka', cursive, sans-serif;
+    }
+    .math-font {
+      font-family: 'Fira Code', monospace;
+    }
+    .grid-canvas-bg {
+      background: radial-gradient(circle at center, #170d28 0%, #090414 100%);
+    }
+    input[type=range] {
+      accent-color: #d946ef;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090414;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #3b0764;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #581c87;
+    }
+    .cancel-line {
+      position: relative;
+    }
+    .cancel-line::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      width: 100%;
+      height: 2px;
+      background: #f43f5e;
+      transform: rotate(-12deg);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-fuchsia-500 selection:text-white">
+
+  <!-- Header Section -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-fuchsia-500 via-pink-500 to-amber-400 flex items-center justify-center shadow-lg shadow-fuchsia-500/20">
+          <span class="text-xl font-black text-white math-font">$\sum$</span>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg font-bold bg-gradient-to-r from-fuchsia-400 via-pink-300 to-amber-300 bg-clip-text text-transparent">
+              Summation of Series: Cambridge 9231 FP1
+            </h1>
+            <div class="inline-flex p-0.5 rounded-lg bg-slate-950 border border-slate-800 text-[11px] font-semibold">
+              <button id="btn-mode-eli6" onclick="setAppMode('eli6')" class="px-2.5 py-0.5 rounded-md transition bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                <span>👶</span> ELI6 Mode
+              </button>
+              <button id="btn-mode-exam" onclick="setAppMode('exam')" class="px-2.5 py-0.5 rounded-md transition text-slate-400 hover:text-slate-200 flex items-center gap-1">
+                <span>🎓</span> Exam 9231 Mode
+              </button>
+            </div>
+          </div>
+          <p id="header-subtitle" class="text-xs text-slate-400">Mastering Standard Sums, Telescoping Differences, and Infinite Convergence</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex items-center bg-slate-950/80 p-1 rounded-xl border border-slate-800 text-xs sm:text-sm">
+        <button onclick="switchTab('tab-powers')" id="btn-tab-powers" class="tab-btn px-3 py-1.5 rounded-lg font-medium transition-all bg-fuchsia-500 text-slate-950 shadow-md font-semibold">
+          🧱 1. Block Towers & $\sum r^k$
+        </button>
+        <button onclick="switchTab('tab-differences')" id="btn-tab-differences" class="tab-btn px-3 py-1.5 rounded-lg font-medium transition-all text-slate-400 hover:text-white">
+          💥 2. Telescoping Dominoes
+        </button>
+        <button onclick="switchTab('tab-infinity')" id="btn-tab-infinity" class="tab-btn px-3 py-1.5 rounded-lg font-medium transition-all text-slate-400 hover:text-white">
+          🎯 3. Infinity Runway ($S_\infty$)
+        </button>
+        <button onclick="switchTab('tab-challenges')" id="btn-tab-challenges" class="tab-btn px-3 py-1.5 rounded-lg font-medium transition-all text-slate-400 hover:text-white">
+          📖 4. Exam Challenges
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content Body -->
+  <main class="max-w-7xl mx-auto px-4 py-6 flex-1 flex flex-col gap-6 w-full">
+
+    <!-- TAB 1: BLOCK TOWERS & POWER SUMS -->
+    <section id="tab-powers" class="tab-panel flex flex-col lg:flex-row gap-6">
+      <!-- Left Visual Canvas Area -->
+      <div class="lg:w-7/12 flex flex-col gap-3">
+        <div class="relative rounded-2xl border border-slate-800 overflow-hidden shadow-2xl grid-canvas-bg">
+          <canvas id="canvas-powers" class="w-full h-[440px] block"></canvas>
+          
+          <!-- Live Floating Indicators -->
+          <div class="absolute top-3 left-3 bg-slate-900/85 backdrop-blur border border-slate-700/60 rounded-xl px-3 py-2 text-xs flex flex-wrap items-center gap-4">
+            <div>
+              <span class="text-slate-400 block text-[10px] uppercase">Active Formula:</span>
+              <span id="power-formula-badge" class="font-bold text-fuchsia-400 text-sm math-font">\sum r = n(n+1)/2</span>
+            </div>
+            <div class="border-l border-slate-700 pl-4">
+              <span class="text-slate-400 block text-[10px] uppercase">Number of terms $n$:</span>
+              <span id="power-n-badge" class="font-bold text-amber-400 text-sm math-font">n = 5</span>
+            </div>
+            <div class="border-l border-slate-700 pl-4">
+              <span class="text-slate-400 block text-[10px] uppercase">Exact Total Sum:</span>
+              <span id="power-total-badge" class="font-bold text-emerald-400 text-sm math-font">Total = 15</span>
+            </div>
+          </div>
+
+          <!-- Interaction Hint -->
+          <div class="absolute bottom-3 right-3 bg-slate-900/80 text-slate-300 text-[11px] px-2.5 py-1 rounded-lg border border-slate-700/50 pointer-events-none">
+            🖱️ Drag the slider to stack blocks and watch the geometry complete!
+          </div>
+        </div>
+
+        <!-- Power Type Selector Buttons -->
+        <div class="bg-slate-900/70 p-3 rounded-xl border border-slate-800 flex flex-wrap gap-2 text-xs">
+          <button id="btn-pow-linear" onclick="setPowerType('linear')" class="pow-btn px-3 py-1.5 rounded-lg bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/50 font-medium transition">
+            🪜 $\sum r$: Triangular Stairs ($n(n+1)/2$)
+          </button>
+          <button id="btn-pow-square" onclick="setPowerType('square')" class="pow-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition">
+            🏛️ $\sum r^2$: Square Pyramid ($n(n+1)(2n+1)/6$)
+          </button>
+          <button id="btn-pow-cube" onclick="setPowerType('cube')" class="pow-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition">
+            🎁 $\sum r^3$: Nicomachus Cube-in-Square ($(\sum r)^2$)
+          </button>
+          <button id="btn-pow-poly" onclick="setPowerType('poly')" class="pow-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition">
+            ⚡ Worked Ex 3.3: $\sum (3r^2 - 4r + 2)$
+          </button>
+        </div>
+
+        <!-- Controls Toolbar -->
+        <div class="bg-slate-900/70 p-4 rounded-xl border border-slate-800 flex flex-col sm:flex-row gap-4 justify-between items-center text-xs">
+          <div class="flex items-center gap-3">
+            <span class="text-slate-300 font-semibold">Choose $n$:</span>
+            <input type="range" id="slider-power-n" min="1" max="15" step="1" value="5" class="w-36 sm:w-48">
+            <span id="val-power-n" class="font-mono text-fuchsia-300 font-bold text-sm">5</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button id="btn-toggle-snap" onclick="toggleCoordinateSnap()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-200 border border-slate-700 transition flex items-center gap-1.5 font-medium">
+              <span id="snap-icon">🧲</span>
+              <span id="snap-label">Snap: ON (Integers)</span>
+            </button>
+            <button onclick="resetPowerView()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 border border-slate-700 transition">
+              ↺ Reset
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Explanations & Formula Proofs -->
+      <div class="lg:w-5/12 flex flex-col gap-4">
+        <!-- ELI6 Story Card -->
+        <div id="card-power-eli6" class="mode-view-eli6 bg-gradient-to-br from-fuchsia-950/40 via-slate-900 to-slate-900 p-5 rounded-2xl border border-fuchsia-500/30">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-2xl">🧱</span>
+            <h3 id="power-story-title" class="text-lg font-bold text-fuchsia-300 eli6-font">The Clever Lego Staircase Trick</h3>
+          </div>
+          <div id="power-story-body" class="text-sm text-slate-300 space-y-2 leading-relaxed">
+            <p>
+              Imagine building a staircase of toy blocks: step 1 has 1 block, step 2 has 2 blocks, up to step $n$.
+            </p>
+            <p>
+              How do you count all the blocks in one second without counting one-by-one?
+            </p>
+            <p>
+              <strong>The Magic Twin Mirror:</strong> Make an identical duplicate staircase, flip it upside down, and snap them together!
+              They form a perfect rectangle of height $n$ and width $(n+1)$!
+            </p>
+            <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 text-center font-bold text-fuchsia-300 math-font text-xs">
+              $\text{Two Staircases } = n \times (n+1) \implies \text{One Staircase } = \frac{n(n+1)}{2}$
+            </div>
+          </div>
+        </div>
+
+        <!-- Exam 9231 Rigorous Card -->
+        <div id="card-power-exam" class="mode-view-exam hidden bg-gradient-to-br from-purple-950/40 via-slate-900 to-slate-900 p-5 rounded-2xl border border-purple-500/40">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">🎓</span>
+              <h3 class="text-base font-bold text-purple-300 tracking-wide">Cambridge 9231 Specification: Section 3.1</h3>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 font-mono">Paper 1 Core</span>
+          </div>
+
+          <div class="text-xs text-slate-300 space-y-2.5 leading-relaxed">
+            <div class="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800">
+              <span class="text-amber-300 font-semibold block mb-1">Standard Summations (Formulae Booklet):</span>
+              $$\sum_{r=1}^n r = \frac{1}{2}n(n+1), \quad \sum_{r=1}^n r^2 = \frac{1}{6}n(n+1)(2n+1), \quad \sum_{r=1}^n r^3 = \frac{1}{4}n^2(n+1)^2$$
+            </div>
+
+            <div class="space-y-1 text-[11px]">
+              <span class="font-semibold text-purple-400 flex items-center gap-1.5">
+                <span>⚠️</span> Cambridge Examination Rules:
+              </span>
+              <ul class="list-disc pl-4 space-y-1 text-slate-300">
+                <li><strong>Constant Multiplier:</strong> $\sum_{r=1}^n k = kn$. Never forget to multiply the constant by $n$!</li>
+                <li><strong>Shifted Lower Limit:</strong> $\sum_{r=a}^b f(r) = \sum_{r=1}^b f(r) - \sum_{r=1}^{a-1} f(r)$. (Note the subtraction bound is $a-1$, NOT $a$!)</li>
+                <li><strong>Factorising vs Expanding:</strong> Factorise terms like $n(n+1)$ directly instead of expanding into cubics.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Algebraic Breakdown Box -->
+        <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 text-xs space-y-3">
+          <div class="flex items-center justify-between text-fuchsia-400 font-bold uppercase tracking-wider text-[11px]">
+            <span>Live Calculation & Step Proof</span>
+            <span id="power-algebra-tag" class="text-[10px] text-slate-400 font-mono">step-by-step</span>
+          </div>
+          <div id="power-algebra-box" class="text-slate-300 text-xs leading-relaxed space-y-1.5 math-font">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Range / Sub-interval Calculator -->
+        <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 text-xs space-y-2.5">
+          <div class="font-semibold text-amber-400 flex items-center justify-between">
+            <span>Interval Sum Calculator $\sum_{r=a}^b f(r)$</span>
+            <span class="text-[10px] text-slate-400">Page 47 technique</span>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-slate-400 text-[10px]">Lower Bound $a$:</label>
+              <input type="number" id="calc-bound-a" value="6" min="1" max="50" class="w-full bg-slate-950 p-1.5 rounded border border-slate-800 text-slate-100 font-mono text-xs">
+            </div>
+            <div>
+              <label class="text-slate-400 text-[10px]">Upper Bound $b$:</label>
+              <input type="number" id="calc-bound-b" value="15" min="1" max="100" class="w-full bg-slate-950 p-1.5 rounded border border-slate-800 text-slate-100 font-mono text-xs">
+            </div>
+          </div>
+          <div id="interval-calc-result" class="p-2 rounded-lg bg-slate-950/80 border border-slate-800 text-emerald-300 font-mono text-xs">
+            <!-- Populated via script -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: TELESCOPING DOMINOES (METHOD OF DIFFERENCES) -->
+    <section id="tab-differences" class="tab-panel hidden flex flex-col lg:flex-row gap-6">
+      <div class="lg:w-7/12 flex flex-col gap-3">
+        <div class="relative rounded-2xl border border-slate-800 overflow-hidden shadow-2xl grid-canvas-bg">
+          <canvas id="canvas-dominoes" class="w-full h-[440px] block"></canvas>
+
+          <!-- Floating Status Overlay -->
+          <div class="absolute top-3 left-3 bg-slate-900/85 backdrop-blur border border-slate-700/60 rounded-xl px-3 py-2 text-xs flex flex-wrap items-center gap-4">
+            <div>
+              <span class="text-slate-400 block text-[10px] uppercase">Active Fraction:</span>
+              <span id="diff-frac-badge" class="font-bold text-pink-400 text-sm math-font">1 / (r(r+1))</span>
+            </div>
+            <div class="border-l border-slate-700 pl-4">
+              <span class="text-slate-400 block text-[10px] uppercase">Cancellations:</span>
+              <span id="diff-cancel-badge" class="font-bold text-emerald-400 text-sm math-font">Telescoping Active</span>
+            </div>
+            <div class="border-l border-slate-700 pl-4">
+              <span class="text-slate-400 block text-[10px] uppercase">Remaining Terms:</span>
+              <span id="diff-remain-badge" class="font-bold text-amber-400 text-sm math-font">1 - 1/(n+1)</span>
+            </div>
+          </div>
+
+          <!-- Legend -->
+          <div class="absolute bottom-3 right-3 bg-slate-900/80 text-slate-300 text-[11px] px-2.5 py-1 rounded-lg border border-slate-700/50 flex items-center gap-2 pointer-events-none">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Green = Survivors
+            <span class="w-2 h-2 rounded-full bg-rose-500 line-through ml-2"></span> Red Slash = Cancelled Pairs
+          </div>
+        </div>
+
+        <!-- Presets Row -->
+        <div class="bg-slate-900/70 p-3 rounded-xl border border-slate-800 flex flex-wrap gap-2 text-xs">
+          <button onclick="setDiffPreset('step1')" id="btn-diff-step1" class="diff-pre-btn px-3 py-1.5 rounded-lg bg-pink-500/20 text-pink-300 border border-pink-500/50 font-medium transition">
+            📘 Page 51: $\frac{1}{r(r+1)} = \frac{1}{r} - \frac{1}{r+1}$ (Offset 1)
+          </button>
+          <button onclick="setDiffPreset('step2')" id="btn-diff-step2" class="diff-pre-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition">
+            📙 Page 52: $\frac{1}{r(r+2)} = \frac{1}{2}(\frac{1}{r} - \frac{1}{r+2})$ (Offset 2)
+          </button>
+          <button onclick="setDiffPreset('ex36')" id="btn-diff-ex36" class="diff-pre-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition">
+            📗 Worked Ex 3.6: $\sum_{r=2}^n \frac{1}{(r-1)(r+1)}$
+          </button>
+          <button onclick="setDiffPreset('june2009')" id="btn-diff-june2009" class="diff-pre-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition">
+            🎓 June 2009 P1 Q2: Double Denominator
+          </button>
+        </div>
+
+        <!-- Interactive Domino Terms Slider -->
+        <div class="bg-slate-900/70 p-4 rounded-xl border border-slate-800 flex items-center justify-between text-xs">
+          <div class="flex items-center gap-3">
+            <span class="text-slate-300 font-semibold">Telescope Length $n$:</span>
+            <input type="range" id="slider-diff-n" min="2" max="8" step="1" value="4" class="w-36 sm:w-48">
+            <span id="val-diff-n" class="font-mono text-pink-300 font-bold text-sm">4</span>
+          </div>
+          <button onclick="triggerTelescopeClash()" class="px-3 py-1.5 rounded-lg bg-pink-600 hover:bg-pink-500 text-white font-semibold transition shadow-md shadow-pink-600/20">
+            ⚡ Play Clash Animation
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Column: Domino Theory & Cancellation Grid -->
+      <div class="lg:w-5/12 flex flex-col gap-4">
+        <div class="bg-gradient-to-br from-pink-950/40 via-slate-900 to-slate-900 p-5 rounded-2xl border border-pink-500/30">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-2xl">💥</span>
+            <h3 id="diff-story-title" class="text-lg font-bold text-pink-300 eli6-font">The Falling Dominoes Effect</h3>
+          </div>
+          <div id="diff-story-body" class="text-sm text-slate-300 space-y-2 leading-relaxed">
+            <p>
+              Imagine a line of 100 soldiers holding hands: $(+A - B) + (+B - C) + (+C - D) + \dots$
+            </p>
+            <p>
+              Each soldier's left hand cancels out the previous soldier's right hand! 
+              The entire giant middle collapses into zero!
+            </p>
+            <p class="text-xs text-slate-400">
+              Only the <strong>very first soldier's left hand</strong> and the <strong>very last soldier's right hand</strong> survive!
+            </p>
+          </div>
+        </div>
+
+        <!-- Live Domino Term-by-Term Grid -->
+        <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 space-y-3">
+          <div class="text-xs font-semibold text-pink-400 uppercase tracking-wider flex items-center justify-between">
+            <span>Visual Term-by-Term Cancellation Grid:</span>
+            <span id="diff-clash-status" class="text-[10px] text-emerald-400 font-mono">all terms paired</span>
+          </div>
+          <div id="diff-terms-container" class="space-y-1.5 text-xs math-font">
+            <!-- Dynamically populated rows -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: INFINITY RUNWAY & CONVERGENCE (S_infinity) -->
+    <section id="tab-infinity" class="tab-panel hidden flex flex-col lg:flex-row gap-6">
+      <div class="lg:w-7/12 flex flex-col gap-3">
+        <div class="relative rounded-2xl border border-slate-800 overflow-hidden shadow-2xl grid-canvas-bg">
+          <canvas id="canvas-infinity" class="w-full h-[440px] block"></canvas>
+
+          <!-- Floating Convergence Overlay -->
+          <div class="absolute top-3 left-3 bg-slate-900/85 backdrop-blur border border-slate-700/60 rounded-xl px-3 py-2 text-xs flex items-center gap-4">
+            <div>
+              <span class="text-slate-400 block text-[10px] uppercase">Current Partial Sum $S_n$:</span>
+              <span id="inf-sn-badge" class="font-bold text-amber-400 text-sm math-font">S_10 = 0.909</span>
+            </div>
+            <div class="border-l border-slate-700 pl-4">
+              <span class="text-slate-400 block text-[10px] uppercase">Exact Sum to Infinity $S_\infty$:</span>
+              <span id="inf-target-badge" class="font-bold text-emerald-400 text-sm math-font">S_∞ = 1.000</span>
+            </div>
+            <div class="border-l border-slate-700 pl-4">
+              <span class="text-slate-400 block text-[10px] uppercase">Residual Gap ($S_\infty - S_n$):</span>
+              <span id="inf-gap-badge" class="font-bold text-rose-400 text-sm math-font">0.091</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Presets for Tab 3 -->
+        <div class="bg-slate-900/70 p-3 rounded-xl border border-slate-800 flex flex-wrap gap-2 text-xs">
+          <button onclick="setInfinityPreset('unit')" id="btn-inf-unit" class="inf-pre-btn px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/50 font-medium transition">
+            📘 Standard: $\sum_{r=1}^\infty \frac{1}{r(r+1)} \implies S_\infty = 1$
+          </button>
+          <button onclick="setInfinityPreset('half')" id="btn-inf-half" class="inf-pre-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition">
+            📙 Offset 2: $\sum_{r=1}^\infty \frac{1}{r(r+2)} \implies S_\infty = \frac{3}{4} = 0.75$
+          </button>
+          <button onclick="setInfinityPreset('past2009')" id="btn-inf-past2009" class="inf-pre-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition">
+            🎓 June 2009 P1: $\sum_{n=1}^\infty \frac{4n+9}{\dots} \implies S_\infty = \frac{1}{15} \approx 0.0667$
+          </button>
+          <button onclick="setInfinityPreset('ex37')" id="btn-inf-ex37" class="inf-pre-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition">
+            ⚡ Worked Ex 3.7: $\sum_{r=2}^\infty \frac{5}{r(r-1)} \implies S_\infty = 5$
+          </button>
+        </div>
+
+        <!-- Infinite Horizon Slider -->
+        <div class="bg-slate-900/70 p-4 rounded-xl border border-slate-800 flex items-center justify-between text-xs">
+          <div class="flex items-center gap-3">
+            <span class="text-slate-300 font-semibold">Scale $n$ towards $\infty$:</span>
+            <input type="range" id="slider-infinity-n" min="1" max="100" step="1" value="10" class="w-36 sm:w-56">
+            <span id="val-infinity-n" class="font-mono text-amber-300 font-bold text-sm">n = 10</span>
+          </div>
+          <button onclick="warpToInfinity()" class="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-semibold transition">
+            🚀 Jump to $n=1000$!
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Column: Infinity Story & Limits Analysis -->
+      <div class="lg:w-5/12 flex flex-col gap-4">
+        <div class="bg-gradient-to-br from-amber-950/40 via-slate-900 to-slate-900 p-5 rounded-2xl border border-amber-500/30">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-2xl">🎯</span>
+            <h3 id="inf-story-title" class="text-lg font-bold text-amber-300 eli6-font">The Shrinking Crumb Trail</h3>
+          </div>
+          <div id="inf-story-body" class="text-sm text-slate-300 space-y-2 leading-relaxed">
+            <p>
+              Can you add numbers together forever and never reach infinity?
+            </p>
+            <p>
+              YES! Look at the leftover tail in our formula:
+            </p>
+            <div class="p-2 rounded-lg bg-slate-950/80 border border-slate-800 text-center font-bold text-amber-300 math-font text-xs">
+              $S_n = 1 - \frac{1}{n+1}$
+            </div>
+            <p class="text-xs text-slate-300">
+              When $n = 1,000,000$, $\frac{1}{1,000,001}$ is smaller than a speck of dust! 
+              As $n \to \infty$, the fraction evaporates to zero, leaving exactly the sum $S_\infty = 1$!
+            </p>
+          </div>
+        </div>
+
+        <!-- Limits Analysis Card -->
+        <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 space-y-3">
+          <div class="text-xs font-semibold text-amber-400 uppercase tracking-wider">Cambridge Specification Convergence:</div>
+          <div id="inf-limits-box" class="space-y-2 text-xs math-font text-slate-300 leading-relaxed"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: EXAM CHALLENGES & QUIZ -->
+    <section id="tab-challenges" class="tab-panel hidden flex flex-col gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Challenge 1 -->
+        <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between hover:border-fuchsia-500/50 transition">
+          <div>
+            <div class="flex items-center justify-between text-xs mb-2">
+              <span class="px-2 py-0.5 rounded bg-fuchsia-500/20 text-fuchsia-300 font-semibold">June 2011 Past Paper</span>
+              <span class="text-slate-500">9231 P13 Q1</span>
+            </div>
+            <h4 class="font-bold text-slate-100 text-sm mb-1">Alternating Squares: $1^2 - 2^2 + 3^2 - 4^2 + \dots - (2n)^2$</h4>
+            <p class="text-xs text-slate-400 mb-3">
+              Group into differences of two squares: $(1-2)(1+2) + (3-4)(3+4) + \dots$
+              Each pair has factor $-1$, so the total is $- (1 + 2 + 3 + 4 + \dots + 2n) = - \frac{2n(2n+1)}{2} = -n(2n+1)$!
+            </p>
+          </div>
+          <button onclick="loadChallengePreset('june2011')" class="w-full py-2 bg-fuchsia-500/20 hover:bg-fuchsia-500/30 text-fuchsia-300 font-semibold text-xs rounded-xl border border-fuchsia-500/40 transition">
+            Test Alternating Sum in Powers Lab →
+          </button>
+        </div>
+
+        <!-- Challenge 2 -->
+        <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between hover:border-pink-500/50 transition">
+          <div>
+            <div class="flex items-center justify-between text-xs mb-2">
+              <span class="px-2 py-0.5 rounded bg-pink-500/20 text-pink-300 font-semibold">June 2009 Past Paper</span>
+              <span class="text-slate-500">9231 P1 Q2</span>
+            </div>
+            <h4 class="font-bold text-slate-100 text-sm mb-1">Double Denominator Telescoping: $S_\infty = \frac{1}{15}$</h4>
+            <p class="text-xs text-slate-400 mb-3">
+              $\frac{4n+9}{(n+2)(n+3)(2n+3)(2n+5)} = \frac{1}{(n+2)(2n+3)} - \frac{1}{(n+3)(2n+5)}$.
+              All middle terms cancel, leaving $S_N = \frac{1}{15} - \frac{1}{(N+3)(2N+5)}$. As $N \to \infty$, $S_\infty = \frac{1}{15}$!
+            </p>
+          </div>
+          <button onclick="loadChallengePreset('june2009')" class="w-full py-2 bg-pink-500/20 hover:bg-pink-500/30 text-pink-300 font-semibold text-xs rounded-xl border border-pink-500/40 transition">
+            Load into Domino Telescoping →
+          </button>
+        </div>
+
+        <!-- Challenge 3 -->
+        <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between hover:border-amber-500/50 transition">
+          <div>
+            <div class="flex items-center justify-between text-xs mb-2">
+              <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold">June 2013 Past Paper</span>
+              <span class="text-slate-500">9231 P11 Q5</span>
+            </div>
+            <h4 class="font-bold text-slate-100 text-sm mb-1">Inequality Tail Bound: $\sum_{r=N+1}^{2N} \dots < \frac{1}{8N}$</h4>
+            <p class="text-xs text-slate-400 mb-3">
+              $\sum_{r=1}^N \frac{1}{(2r+1)(2r+3)} = \frac{1}{6} - \frac{1}{2(2N+3)}$.
+              The sum from $N+1$ to $2N$ simplifies to $\frac{1}{2(2N+3)} - \frac{1}{2(4N+3)} = \frac{N}{(2N+3)(4N+3)} < \frac{N}{8N^2} = \frac{1}{8N}$!
+            </p>
+          </div>
+          <button onclick="loadChallengePreset('june2013')" class="w-full py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-semibold text-xs rounded-xl border border-amber-500/40 transition">
+            Inspect Tail Bound in Infinity Lab →
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Interactive Quiz -->
+      <div class="bg-slate-900/70 p-6 rounded-2xl border border-slate-800 mt-2">
+        <h3 class="text-base font-bold text-slate-100 mb-2 flex items-center gap-2">
+          <span>🎯</span> Test Your Intuition: Summation Checkpoint
+        </h3>
+        <p class="text-xs text-slate-400 mb-4">Click an option to inspect the intuitive child-friendly explanation & examiner mark rubric!</p>
+
+        <div class="space-y-4">
+          <!-- Question 1 -->
+          <div class="p-4 bg-slate-950/60 rounded-xl border border-slate-800 text-xs space-y-2">
+            <div class="font-semibold text-slate-200">
+              Q1: In the series $\sum_{r=1}^n \frac{1}{r(r+2)} = \frac{1}{2}\sum (\frac{1}{r} - \frac{1}{r+2})$, why do TWO terms survive at the beginning?
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <button onclick="checkQuiz(1, 'A')" id="q1-opt-A" class="quiz-btn p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-left transition text-slate-300">
+                A) Because the difference between $r$ and $r+2$ is 2 steps, so the negative part skips ahead by 2!
+              </button>
+              <button onclick="checkQuiz(1, 'B')" id="q1-opt-B" class="quiz-btn p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-left transition text-slate-300">
+                B) It's just a coincidence of $n$ being an even number
+              </button>
+              <button onclick="checkQuiz(1, 'C')" id="q1-opt-C" class="quiz-btn p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-left transition text-slate-300">
+                C) Only one term survives, the textbook has a typo
+              </button>
+            </div>
+            <div id="q1-feedback" class="hidden text-xs p-2.5 rounded-lg mt-2"></div>
+          </div>
+
+          <!-- Question 2 -->
+          <div class="p-4 bg-slate-950/60 rounded-xl border border-slate-800 text-xs space-y-2">
+            <div class="font-semibold text-slate-200">
+              Q2: When evaluating $\sum_{r=11}^{25} (4r+1)$, what is the correct subtraction?
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <button onclick="checkQuiz(2, 'A')" id="q2-opt-A" class="quiz-btn p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-left transition text-slate-300">
+                A) $S_{25} - S_{11}$
+              </button>
+              <button onclick="checkQuiz(2, 'B')" id="q2-opt-B" class="quiz-btn p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-left transition text-slate-300">
+                B) $S_{25} - S_{10}$ because term $r=11$ MUST be included in the sum!
+              </button>
+              <button onclick="checkQuiz(2, 'C')" id="q2-opt-C" class="quiz-btn p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-left transition text-slate-300">
+                C) Just plug $n=14$ into the formula
+              </button>
+            </div>
+            <div id="q2-feedback" class="hidden text-xs p-2.5 rounded-lg mt-2"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- JavaScript Application Logic -->
+  <script>
+    let currentTab = 'tab-powers';
+    let appMode = 'eli6'; // 'eli6' or 'exam'
+    let snapEnabled = true;
+
+    // Tab 1: Powers State
+    let powerState = {
+      type: 'linear', // 'linear', 'square', 'cube', 'poly'
+      n: 5
+    };
+
+    // Tab 2: Differences State
+    let diffState = {
+      preset: 'step1', // 'step1', 'step2', 'ex36', 'june2009'
+      n: 4,
+      animating: false
+    };
+
+    // Tab 3: Infinity State
+    let infState = {
+      preset: 'unit', // 'unit', 'half', 'past2009', 'ex37'
+      n: 10
+    };
+
+    /**
+     * STREAMING_CHUNK:Setting up HiDPI Canvas Helper
+     */
+    function setupHiDPICanvas(canvas) {
+      if (!canvas) return { ctx: null, width: 600, height: 440 };
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      const width = rect.width > 0 ? rect.width : (canvas.parentElement ? canvas.parentElement.clientWidth : 600);
+      const height = rect.height > 0 ? rect.height : 440;
+
+      const targetW = Math.floor(width * dpr);
+      const targetH = Math.floor(height * dpr);
+
+      if (canvas.width !== targetW || canvas.height !== targetH) {
+        canvas.width = targetW;
+        canvas.height = targetH;
+      }
+
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      return { ctx, width, height };
+    }
+
+    /**
+     * STREAMING_CHUNK:Configuring Math Render Helper
+     */
+    function renderMath(element) {
+      if (window.renderMathInElement && element) {
+        try {
+          renderMathInElement(element, {
+            delimiters: [
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false}
+            ],
+            throwOnError: false
+          });
+        } catch(e) {
+          console.error("KaTeX error", e);
+        }
+      }
+    }
+
+    /**
+     * STREAMING_CHUNK:Managing Tab Switching
+     */
+    function switchTab(tabId) {
+      currentTab = tabId;
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+      const target = document.getElementById(tabId);
+      if (target) target.classList.remove('hidden');
+
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('bg-fuchsia-500', 'text-slate-950', 'shadow-md', 'font-semibold');
+        b.classList.add('text-slate-400');
+      });
+      const activeBtn = document.getElementById('btn-' + tabId);
+      if (activeBtn) {
+        activeBtn.classList.add('bg-fuchsia-500', 'text-slate-950', 'shadow-md', 'font-semibold');
+        activeBtn.classList.remove('text-slate-400');
+      }
+
+      setTimeout(() => {
+        if (tabId === 'tab-powers') drawPowersCanvas();
+        else if (tabId === 'tab-differences') drawDominoesCanvas();
+        else if (tabId === 'tab-infinity') drawInfinityCanvas();
+      }, 20);
+    }
+
+    /**
+     * STREAMING_CHUNK:Managing Dual Mode ELI6 vs Exam Switcher
+     */
+    function setAppMode(mode) {
+      appMode = mode;
+      const btnEli6 = document.getElementById('btn-mode-eli6');
+      const btnExam = document.getElementById('btn-mode-exam');
+      const cardEli6 = document.getElementById('card-power-eli6');
+      const cardExam = document.getElementById('card-power-exam');
+      const subtitle = document.getElementById('header-subtitle');
+
+      if (mode === 'eli6') {
+        btnEli6.classList.add('bg-emerald-500/20', 'text-emerald-300', 'border-emerald-500/30');
+        btnEli6.classList.remove('text-slate-400');
+        btnExam.classList.remove('bg-purple-500/20', 'text-purple-300', 'border-purple-500/40');
+        btnExam.classList.add('text-slate-400');
+
+        cardEli6.classList.remove('hidden');
+        cardExam.classList.add('hidden');
+        subtitle.textContent = "Mastering Standard Sums, Telescoping Dominoes, and Infinity with fun stories!";
+      } else {
+        btnExam.classList.add('bg-purple-500/20', 'text-purple-300', 'border-purple-500/40');
+        btnExam.classList.remove('text-slate-400');
+        btnEli6.classList.remove('bg-emerald-500/20', 'text-emerald-300', 'border-emerald-500/30');
+        btnEli6.classList.add('text-slate-400');
+
+        cardExam.classList.remove('hidden');
+        cardEli6.classList.add('hidden');
+        subtitle.textContent = "Cambridge CIE 9231 Further Pure Mathematics 1: Summation of Series Specification";
+      }
+
+      updatePowerDetails();
+      updateDiffDetails();
+      updateInfinityDetails();
+      renderMath(document.body);
+    }
+
+    /**
+     * STREAMING_CHUNK:Toggling Coordinate Snap
+     */
+    function toggleCoordinateSnap() {
+      snapEnabled = !snapEnabled;
+      const btn = document.getElementById('btn-toggle-snap');
+      const label = document.getElementById('snap-label');
+
+      if (snapEnabled) {
+        btn.classList.add('bg-fuchsia-500/20', 'text-fuchsia-300', 'border-fuchsia-500/50');
+        btn.classList.remove('bg-slate-800', 'text-slate-200');
+        label.textContent = 'Snap: ON (Integers)';
+      } else {
+        btn.classList.remove('bg-fuchsia-500/20', 'text-fuchsia-300', 'border-fuchsia-500/50');
+        btn.classList.add('bg-slate-800', 'text-slate-200');
+        label.textContent = 'Snap: OFF';
+      }
+    }
+
+    // ==========================================
+    // TAB 1: BLOCK TOWERS & POWER SUMS LOGIC
+    // ==========================================
+    const canvasPowers = document.getElementById('canvas-powers');
+    const sliderPowerN = document.getElementById('slider-power-n');
+    const valPowerN = document.getElementById('val-power-n');
+
+    sliderPowerN.addEventListener('input', (e) => {
+      let val = parseInt(e.target.value);
+      powerState.n = val;
+      valPowerN.textContent = val;
+      updatePowerDetails();
+      drawPowersCanvas();
+    });
+
+    function setPowerType(type) {
+      powerState.type = type;
+      document.querySelectorAll('.pow-btn').forEach(btn => {
+        btn.className = 'pow-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition';
+      });
+
+      const activeBtn = document.getElementById('btn-pow-' + type);
+      if (activeBtn) {
+        activeBtn.className = 'pow-btn px-3 py-1.5 rounded-lg bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/50 font-medium transition';
+      }
+
+      // Max n adjustment for clean visual fit
+      if (type === 'cube' || type === 'square') {
+        sliderPowerN.max = 8;
+        if (powerState.n > 8) powerState.n = 6;
+      } else {
+        sliderPowerN.max = 15;
+      }
+      sliderPowerN.value = powerState.n;
+      valPowerN.textContent = powerState.n;
+
+      updatePowerDetails();
+      drawPowersCanvas();
+    }
+
+    function resetPowerView() {
+      powerState.n = 5;
+      sliderPowerN.value = 5;
+      valPowerN.textContent = 5;
+      updatePowerDetails();
+      drawPowersCanvas();
+    }
+
+    /**
+     * STREAMING_CHUNK:Calculating standard summation formula values and updates
+     */
+    function computeStandardSum(type, n) {
+      if (type === 'linear') {
+        return (n * (n + 1)) / 2;
+      } else if (type === 'square') {
+        return (n * (n + 1) * (2 * n + 1)) / 6;
+      } else if (type === 'cube') {
+        const lin = (n * (n + 1)) / 2;
+        return lin * lin;
+      } else {
+        // Worked Ex 3.3: sum_{r=1}^n (3r^2 - 4r + 2)
+        // 3 * n(n+1)(2n+1)/6 - 4 * n(n+1)/2 + 2n = n^3 - (1/2)n^2 + (1/2)n
+        return Math.round(Math.pow(n, 3) - 0.5 * Math.pow(n, 2) + 0.5 * n);
+      }
+    }
+
+    function updatePowerDetails() {
+      const n = powerState.n;
+      const t = powerState.type;
+      const total = computeStandardSum(t, n);
+
+      const fBadge = document.getElementById('power-formula-badge');
+      const nBadge = document.getElementById('power-n-badge');
+      const tBadge = document.getElementById('power-total-badge');
+      const storyTitle = document.getElementById('power-story-title');
+      const storyBody = document.getElementById('power-story-body');
+      const algebraBox = document.getElementById('power-algebra-box');
+
+      nBadge.textContent = `n = ${n}`;
+      tBadge.textContent = `Total = ${total}`;
+
+      if (t === 'linear') {
+        fBadge.textContent = '\\sum r = n(n+1)/2';
+        storyTitle.textContent = '🪜 The Clever Twin Staircase Trick (\\sum r)';
+        storyBody.innerHTML = `
+          <p>Imagine building a Lego staircase: step 1 has 1 block, step 2 has 2 blocks, up to step $n$.</p>
+          <p>Make a twin duplicate staircase, rotate it upside down, and snap them together!</p>
+          <p>Together they form a flat rectangle of size $n \\times (n+1)$. Since we used two staircases, one staircase is exactly $\\frac{n(n+1)}{2}$!</p>
+        `;
+        algebraBox.innerHTML = `
+          <div>1. Expansion identity: $(r+1)^2 - r^2 = 2r + 1$</div>
+          <div>2. Summing from $r=1$ to $n$: $(n+1)^2 - 1 = 2\\sum r + n$</div>
+          <div>3. Rearrange: $2\\sum r = (n^2 + 2n + 1) - n - 1 = n(n+1)$</div>
+          <div>4. Therefore: $\\sum_{r=1}^{${n}} r = \\frac{${n} \\times ${n+1}}{2} = \\mathbf{${total}}$</div>
+        `;
+      } else if (t === 'square') {
+        fBadge.textContent = '\\sum r^2 = n(n+1)(2n+1)/6';
+        storyTitle.textContent = '🏛️ The Egyptian Pyramid of Squares (\\sum r^2)';
+        storyBody.innerHTML = `
+          <p>Stacking squares of blocks ($1^2 + 2^2 + 3^2 + \\dots$) creates a stepped pyramid!</p>
+          <p>To find the volume, mathematicians fit <strong>six identical pyramids</strong> together to form a solid rectangular prism of dimensions $n \\times (n+1) \\times (2n+1)$!</p>
+          <p>Dividing that prism by 6 gives the famous formula $\\frac{n(n+1)(2n+1)}{6}$!</p>
+        `;
+        algebraBox.innerHTML = `
+          <div>1. Telescoping identity: $(r+1)^3 - r^3 = 3r^2 + 3r + 1$</div>
+          <div>2. Summing from $1$ to $n$: $(n+1)^3 - 1 = 3\\sum r^2 + 3\\sum r + n$</div>
+          <div>3. Substitute $\\sum r = \\frac{n(n+1)}{2}$ and factorise:</div>
+          <div>4. $3\\sum r^2 = n(n+1)(n+2) - \\frac{3}{2}n(n+1) = \\frac{n(n+1)(2n+1)}{2}$</div>
+          <div>5. Result: $\\sum_{r=1}^{${n}} r^2 = \\frac{${n} \\times ${n+1} \\times ${2*n+1}}{6} = \\mathbf{${total}}$</div>
+        `;
+      } else if (t === 'cube') {
+        fBadge.textContent = '\\sum r^3 = (n(n+1)/2)^2';
+        storyTitle.textContent = '🎁 Nicomachus\'s Miracle Square (\\sum r^3 = (\\sum r)^2)';
+        storyBody.innerHTML = `
+          <p>One of the most mind-blowing theorems in all of mathematics discovered in 100 AD by Nicomachus of Gerasa!</p>
+          <p>The sum of the first $n$ cubes is EXACTLY equal to the square of the sum of the numbers!</p>
+          <div class="p-2 rounded bg-slate-950/80 border border-slate-800 text-center font-bold text-fuchsia-300">
+            $1^3 + 2^3 + 3^3 + \\dots + n^3 = (1 + 2 + 3 + \\dots + n)^2$
+          </div>
+        `;
+        algebraBox.innerHTML = `
+          <div>1. Identity: $(r+1)^4 - r^4 = 4r^3 + 6r^2 + 4r + 1$</div>
+          <div>2. Summing from $1$ to $n$ and cancelling leaves:</div>
+          <div>3. $4\\sum r^3 = (n+1)^4 - 1 - 6\\sum r^2 - 4\\sum r - n$</div>
+          <div>4. Factorises into the perfect square: $\\left[\\frac{n(n+1)}{2}\\right]^2$</div>
+          <div>5. Result: $\\sum_{r=1}^{${n}} r^3 = \\left(\\frac{${n} \\times ${n+1}}{2}\\right)^2 = ${computeStandardSum('linear', n)}^2 = \\mathbf{${total}}$</div>
+        `;
+      } else {
+        fBadge.textContent = '\\sum (3r^2 - 4r + 2) = n^3 - \\frac{1}{2}n^2 + \\frac{1}{2}n';
+        storyTitle.textContent = '⚡ Polynomial Series Decomposition';
+        storyBody.innerHTML = `
+          <p>In Cambridge exams, polynomials inside $\\sum$ are split linearly into known standard sums!</p>
+          <p>Break into $3\\sum r^2 - 4\\sum r + \\sum 2$. Remember that $\\sum_{r=1}^n 2 = 2n$!</p>
+        `;
+        algebraBox.innerHTML = `
+          <div>1. Split: $3\\sum r^2 - 4\\sum r + \\sum 2$</div>
+          <div>2. $= 3\\left(\\frac{n(n+1)(2n+1)}{6}\\right) - 4\\left(\\frac{n(n+1)}{2}\\right) + 2n$</div>
+          <div>3. $= \\frac{n}{2}(2n^2+3n+1) - 2n^2 - 2n + 2n = n^3 - \\frac{1}{2}n^2 + \\frac{1}{2}n$</div>
+          <div>4. At $n = ${n}$: $(${n})^3 - 0.5(${n})^2 + 0.5(${n}) = \\mathbf{${total}}$</div>
+        `;
+      }
+
+      updateIntervalCalc();
+      renderMath(algebraBox);
+      renderMath(storyBody);
+      renderMath(storyTitle);
+    }
+
+    function updateIntervalCalc() {
+      const a = parseInt(document.getElementById('calc-bound-a').value) || 1;
+      const b = parseInt(document.getElementById('calc-bound-b').value) || 1;
+      const res = document.getElementById('interval-calc-result');
+      if (a > b) {
+        res.textContent = 'Lower bound a must be ≤ upper bound b!';
+        return;
+      }
+      const t = powerState.type;
+      const sumB = computeStandardSum(t, b);
+      const sumA_minus_1 = a > 1 ? computeStandardSum(t, a - 1) : 0;
+      const diff = sumB - sumA_minus_1;
+      res.innerHTML = `
+        $$\\sum_{r=${a}}^{${b}} f(r) = S_{${b}} - S_{${a-1}} = ${sumB} - ${sumA_minus_1} = \\mathbf{${diff}}$$
+      `;
+      renderMath(res);
+    }
+
+    document.getElementById('calc-bound-a').addEventListener('input', updateIntervalCalc);
+    document.getElementById('calc-bound-b').addEventListener('input', updateIntervalCalc);
+
+    /**
+     * STREAMING_CHUNK:Drawing Tab 1 Power Sums Canvas (Stairs, Pyramids, Nicomachus Squares)
+     */
+    function drawPowersCanvas() {
+      if (!canvasPowers) return;
+      const { ctx, width, height } = setupHiDPICanvas(canvasPowers);
+      if (!ctx) return;
+      const n = powerState.n;
+      const t = powerState.type;
+
+      ctx.clearRect(0, 0, width, height);
+
+      if (t === 'linear') {
+        // Draw the twin staircases snapping together
+        const blockSize = Math.min(26, Math.floor((width - 120) / (n + 1)));
+        const startX = (width - (n + 1) * blockSize) / 2;
+        const startY = height - 70;
+
+        // Draw original staircase (Cyan/Fuchsia)
+        for (let col = 1; col <= n; col++) {
+          for (let row = 0; row < col; row++) {
+            const bx = startX + (col - 1) * blockSize;
+            const by = startY - row * blockSize;
+            ctx.fillStyle = '#d946ef';
+            ctx.fillRect(bx, by, blockSize - 2, blockSize - 2);
+            ctx.strokeStyle = '#fae8ff';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(bx, by, blockSize - 2, blockSize - 2);
+          }
+        }
+
+        // Draw inverted twin staircase (Amber/Golden)
+        for (let col = 1; col <= n; col++) {
+          const invCol = (n + 1) - col;
+          for (let row = 0; row < invCol; row++) {
+            const bx = startX + (col) * blockSize;
+            const by = startY - (n - 1 - row) * blockSize;
+            ctx.fillStyle = '#f59e0b';
+            ctx.fillRect(bx, by, blockSize - 2, blockSize - 2);
+            ctx.strokeStyle = '#fef3c7';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(bx, by, blockSize - 2, blockSize - 2);
+          }
+        }
+
+        // Labels
+        ctx.fillStyle = '#fdf4ff';
+        ctx.font = 'bold 12px Fredoka, sans-serif';
+        ctx.fillText(`Width = n + 1 = ${n + 1} blocks`, startX, startY + 28);
+        ctx.fillText(`Height = n = ${n} blocks`, startX - 10, startY - n * blockSize - 10);
+        ctx.fillStyle = '#d946ef';
+        ctx.fillText(`Pink Staircase = ${computeStandardSum('linear', n)}`, startX + 20, startY - (n/2)*blockSize);
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillText(`Amber Twin = ${computeStandardSum('linear', n)}`, startX + (n*0.6)*blockSize, startY - (n*0.7)*blockSize);
+
+      } else if (t === 'square') {
+        // Draw 3D-styled stacked square pyramid layers
+        const originX = width / 2;
+        const originY = height - 60;
+        const layerH = Math.min(28, Math.floor(220 / n));
+
+        for (let k = n; k >= 1; k--) {
+          const layerW = k * 34;
+          const yPos = originY - (n - k) * layerH;
+          const xPos = originX - layerW / 2;
+
+          // Gradient fill per layer
+          const grad = ctx.createLinearGradient(xPos, yPos, xPos + layerW, yPos);
+          grad.addColorStop(0, '#a21caf');
+          grad.addColorStop(0.5, '#d946ef');
+          grad.addColorStop(1, '#701a75');
+
+          ctx.fillStyle = grad;
+          ctx.fillRect(xPos, yPos - layerH, layerW, layerH - 3);
+          ctx.strokeStyle = '#fdf4ff';
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(xPos, yPos - layerH, layerW, layerH - 3);
+
+          // Block Count Text inside layer
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 11px Fira Code, monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText(`Layer ${k}: ${k}² = ${k * k}`, originX, yPos - layerH / 2 + 3);
+        }
+        ctx.textAlign = 'left';
+
+      } else if (t === 'cube') {
+        // Draw Nicomachus Square decomposed into L-shaped gnomons
+        const linSum = (n * (n + 1)) / 2;
+        const sideLen = Math.min(320, width - 100);
+        const startX = (width - sideLen) / 2;
+        const startY = (height - sideLen) / 2 + 10;
+        const colors = ['#f43f5e', '#ec4899', '#d946ef', '#a855f7', '#8b5cf6', '#6366f1', '#0ea5e9', '#10b981'];
+
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(startX, startY, sideLen, sideLen);
+
+        let prevFrac = 0;
+        for (let k = 1; k <= n; k++) {
+          const curSum = (k * (k + 1)) / 2;
+          const curFrac = curSum / linSum;
+          const prevEdge = prevFrac * sideLen;
+          const curEdge = curFrac * sideLen;
+
+          ctx.fillStyle = colors[(k - 1) % colors.length];
+          ctx.beginPath();
+          // L-shaped gnomon
+          ctx.moveTo(startX, startY + prevEdge);
+          ctx.lineTo(startX + curEdge, startY + prevEdge);
+          ctx.lineTo(startX + curEdge, startY);
+          ctx.lineTo(startX + curEdge, startY + curEdge);
+          ctx.lineTo(startX, startY + curEdge);
+          ctx.closePath();
+          ctx.fill();
+          ctx.strokeStyle = '#090414';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          // Label gnomon
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 11px Fredoka, sans-serif';
+          ctx.fillText(`r=${k} (Area = ${k}³ = ${k*k*k})`, startX + prevEdge + 6, startY + curEdge - 6);
+
+          prevFrac = curFrac;
+        }
+
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2.5;
+        ctx.strokeRect(startX, startY, sideLen, sideLen);
+        ctx.fillStyle = '#facc15';
+        ctx.font = 'bold 12px Fira Code, monospace';
+        ctx.fillText(`Square Side = \\sum_{r=1}^${n} r = ${linSum}`, startX, startY - 8);
+        ctx.fillText(`Total Square Area = ${linSum}² = ${linSum * linSum}`, startX, startY + sideLen + 18);
+
+      } else {
+        // Polynomial decomposition bar chart comparison
+        const terms = [];
+        for (let r = 1; r <= n; r++) {
+          terms.push({ r, val: 3 * r * r - 4 * r + 2 });
+        }
+        const maxVal = terms[terms.length - 1].val;
+        const barW = Math.min(30, Math.floor((width - 120) / n));
+        const startX = (width - n * (barW + 8)) / 2;
+        const baseY = height - 60;
+
+        terms.forEach((tm, idx) => {
+          const bx = startX + idx * (barW + 8);
+          const barH = (tm.val / maxVal) * 260;
+          ctx.fillStyle = '#ec4899';
+          ctx.fillRect(bx, baseY - barH, barW, barH);
+          ctx.strokeStyle = '#fdf4ff';
+          ctx.strokeRect(bx, baseY - barH, barW, barH);
+
+          ctx.fillStyle = '#94a3b8';
+          ctx.font = '10px monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText(`r=${tm.r}`, bx + barW / 2, baseY + 14);
+          ctx.fillText(`${tm.val}`, bx + barW / 2, baseY - barH - 6);
+        });
+        ctx.textAlign = 'left';
+      }
+    }
+
+    // ==========================================
+    // TAB 2: TELESCOPING DOMINOES SIMULATION
+    // ==========================================
+    const canvasDominoes = document.getElementById('canvas-dominoes');
+    const sliderDiffN = document.getElementById('slider-diff-n');
+    const valDiffN = document.getElementById('val-diff-n');
+
+    sliderDiffN.addEventListener('input', (e) => {
+      diffState.n = parseInt(e.target.value);
+      valDiffN.textContent = diffState.n;
+      updateDiffDetails();
+      drawDominoesCanvas();
+    });
+
+    function setDiffPreset(key) {
+      diffState.preset = key;
+      document.querySelectorAll('.diff-pre-btn').forEach(btn => {
+        btn.className = 'diff-pre-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition';
+      });
+      const activeBtn = document.getElementById('btn-diff-' + key);
+      if (activeBtn) {
+        activeBtn.className = 'diff-pre-btn px-3 py-1.5 rounded-lg bg-pink-500/20 text-pink-300 border border-pink-500/50 font-medium transition';
+      }
+
+      updateDiffDetails();
+      drawDominoesCanvas();
+    }
+
+    function triggerTelescopeClash() {
+      diffState.animating = true;
+      let frame = 0;
+      const clashStatus = document.getElementById('diff-clash-status');
+      clashStatus.textContent = '🔥 Clash in Progress!';
+
+      function anim() {
+        frame++;
+        drawDominoesCanvas(frame);
+        if (frame < 30) {
+          requestAnimationFrame(anim);
+        } else {
+          diffState.animating = false;
+          clashStatus.textContent = '✨ Completed! Only boundary terms remain!';
+          drawDominoesCanvas(30);
+        }
+      }
+      anim();
+    }
+
+    /**
+     * STREAMING_CHUNK:Evaluating Tab 2 Differences, partial fractions, and term cancellations
+     */
+    function updateDiffDetails() {
+      const p = diffState.preset;
+      const n = diffState.n;
+      const fBadge = document.getElementById('diff-frac-badge');
+      const rBadge = document.getElementById('diff-remain-badge');
+      const title = document.getElementById('diff-story-title');
+      const body = document.getElementById('diff-story-body');
+      const container = document.getElementById('diff-terms-container');
+
+      let termList = [];
+
+      if (p === 'step1') {
+        fBadge.textContent = '1 / (r(r+1))';
+        rBadge.textContent = `1 - 1/(${n}+1) = ${n}/${n+1}`;
+        title.textContent = '📘 Step Offset 1: Immediate Cancellation';
+        body.innerHTML = `
+          <p>Partial fractions: $\\frac{1}{r(r+1)} = \\frac{1}{r} - \\frac{1}{r+1}$.</p>
+          <p>Because the denominators differ by only $1$, the negative part of term $r$ is immediately cancelled by the positive part of term $(r+1)$!</p>
+          <div class="p-2 rounded bg-slate-950/80 border border-slate-800 text-center font-bold text-pink-300 text-xs">
+            $(\\frac{1}{1} - \\frac{1}{2}) + (\\frac{1}{2} - \\frac{1}{3}) + \\dots + (\\frac{1}{${n}} - \\frac{1}{${n+1}}) = 1 - \\frac{1}{${n+1}}$
+          </div>
+        `;
+        for (let r = 1; r <= n; r++) {
+          termList.push({ pos: `+1/${r}`, neg: `-1/${r+1}`, valPos: 1/r, valNeg: -1/(r+1) });
+        }
+      } else if (p === 'step2') {
+        fBadge.textContent = '1 / (r(r+2))';
+        rBadge.textContent = `3/4 - 1/(2(${n}+1)) - 1/(2(${n}+2))`;
+        title.textContent = '📙 Step Offset 2: Twin Survivors at Both Ends!';
+        body.innerHTML = `
+          <p>Partial fractions: $\\frac{1}{r(r+2)} = \\frac{1}{2}(\\frac{1}{r} - \\frac{1}{r+2})$.</p>
+          <p>Since the gap between $r$ and $r+2$ is $2$, cancellations skip one step! 
+          Therefore, <strong>TWO terms survive at the beginning</strong> ($r=1$ and $r=2$) and <strong>TWO terms survive at the end</strong>!</p>
+        `;
+        for (let r = 1; r <= n; r++) {
+          termList.push({ pos: `+1/${r}`, neg: `-1/${r+2}`, valPos: 1/r, valNeg: -1/(r+2) });
+        }
+      } else if (p === 'ex36') {
+        fBadge.textContent = '1 / ((r-1)(r+1))';
+        rBadge.textContent = `3/4 - 1/(2*${n}) - 1/(2*(${n}+1))`;
+        title.textContent = '📗 Worked Ex 3.6: Sum Starting at r = 2';
+        body.innerHTML = `
+          <p>Careful with the lower limit! Here the sum starts at $r=2$ instead of $r=1$!</p>
+          <p>$\\sum_{r=2}^n \\frac{1}{(r-1)(r+1)} = \\frac{1}{2}\\left( (\\frac{1}{1} - \\frac{1}{3}) + (\\frac{1}{2} - \\frac{1}{4}) + \\dots \\right) = \\frac{3}{4} - \\frac{1}{2n} - \\frac{1}{2(n+1)}$.</p>
+        `;
+        for (let r = 2; r <= n + 1; r++) {
+          termList.push({ pos: `+1/${r-1}`, neg: `-1/${r+1}`, valPos: 1/(r-1), valNeg: -1/(r+1) });
+        }
+      } else {
+        fBadge.textContent = 'June 2009 P1 Q2';
+        rBadge.textContent = `1/15 - 1/((${n}+3)(2*${n}+5))`;
+        title.textContent = '🎓 Cambridge June 2009 P1 Q2 Telescoping';
+        body.innerHTML = `
+          <p>Algebraic identity verified: $\\frac{1}{(n+2)(2n+3)} - \\frac{1}{(n+3)(2n+5)} = \\frac{4n+9}{(n+2)(n+3)(2n+3)(2n+5)}$.</p>
+          <p>At $n=1$: $\\frac{1}{3 \\times 5} = \\frac{1}{15}$. At $N \\to \\infty$, the tail disappears leaving exactly $\\mathbf{\\frac{1}{15}}$!</p>
+        `;
+        for (let r = 1; r <= n; r++) {
+          termList.push({ pos: `+1/(${(r+2)*(2*r+3)})`, neg: `-1/(${(r+3)*(2*r+5)})`, valPos: 1/((r+2)*(2*r+3)), valNeg: -1/((r+3)*(2*r+5)) });
+        }
+      }
+
+      // Populate Visual HTML grid of dominoes
+      container.innerHTML = '';
+      termList.forEach((tm, idx) => {
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between p-1.5 rounded bg-slate-900/80 border border-slate-800 text-[11px]';
+        
+        let posSurvives = false;
+        let negSurvives = false;
+        if (p === 'step1') {
+          if (idx === 0) posSurvives = true;
+          if (idx === termList.length - 1) negSurvives = true;
+        } else if (p === 'step2' || p === 'ex36') {
+          if (idx === 0 || idx === 1) posSurvives = true;
+          if (idx >= termList.length - 2) negSurvives = true;
+        } else {
+          if (idx === 0) posSurvives = true;
+          if (idx === termList.length - 1) negSurvives = true;
+        }
+
+        row.innerHTML = `
+          <span class="text-slate-500 font-mono">Term r=${p==='ex36'?idx+2:idx+1}:</span>
+          <div class="flex items-center gap-2">
+            <span class="${posSurvives ? 'text-emerald-400 font-bold' : 'text-slate-400 line-through text-rose-400/80'}">${tm.pos}</span>
+            <span class="${negSurvives ? 'text-emerald-400 font-bold' : 'text-slate-400 line-through text-rose-400/80'}">${tm.neg}</span>
+          </div>
+          <span class="text-[10px] ${posSurvives || negSurvives ? 'text-emerald-400 font-bold' : 'text-slate-600'}">
+            ${posSurvives && negSurvives ? 'Ends Survive' : (posSurvives ? 'Start Survivor' : (negSurvives ? 'End Survivor' : 'Cancelled'))}
+          </span>
+        `;
+        container.appendChild(row);
+      });
+
+      renderMath(title);
+      renderMath(body);
+    }
+
+    /**
+     * STREAMING_CHUNK:Drawing Tab 2 Dominoes Canvas with cancellation animations
+     */
+    function drawDominoesCanvas(animProgress = 30) {
+      if (!canvasDominoes) return;
+      const { ctx, width, height } = setupHiDPICanvas(canvasDominoes);
+      if (!ctx) return;
+      const n = diffState.n;
+      const p = diffState.preset;
+
+      ctx.clearRect(0, 0, width, height);
+
+      const dominoW = Math.min(85, Math.floor((width - 60) / n));
+      const dominoH = 140;
+      const startX = (width - n * dominoW) / 2;
+      const startY = (height - dominoH) / 2;
+
+      for (let i = 0; i < n; i++) {
+        const dx = startX + i * dominoW;
+        const dy = startY;
+
+        // Domino body
+        ctx.fillStyle = '#1e1b4b';
+        ctx.fillRect(dx + 4, dy, dominoW - 8, dominoH);
+        ctx.strokeStyle = '#818cf8';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(dx + 4, dy, dominoW - 8, dominoH);
+
+        // Center split line
+        ctx.beginPath();
+        ctx.moveTo(dx + 4, dy + dominoH / 2);
+        ctx.lineTo(dx + dominoW - 4, dy + dominoH / 2);
+        ctx.strokeStyle = '#4338ca';
+        ctx.stroke();
+
+        // Top half (+ part)
+        const isStartSurv = (p === 'step2' || p === 'ex36') ? (i < 2) : (i === 0);
+        ctx.fillStyle = isStartSurv ? '#34d399' : '#e2e8f0';
+        ctx.font = 'bold 11px Fira Code, monospace';
+        ctx.textAlign = 'center';
+        let topText = `+1/${p === 'ex36' ? i + 1 : i + 1}`;
+        if (p === 'june2009') topText = `+1/${(i+3)*(2*i+5)}`;
+        ctx.fillText(topText, dx + dominoW / 2, dy + dominoH / 4 + 4);
+
+        // Bottom half (- part)
+        const isEndSurv = (p === 'step2' || p === 'ex36') ? (i >= n - 2) : (i === n - 1);
+        ctx.fillStyle = isEndSurv ? '#34d399' : '#f43f5e';
+        let botText = `-1/${p === 'ex36' ? i + 3 : (p === 'step2' ? i + 3 : i + 2)}`;
+        if (p === 'june2009') botText = `-1/${(i+4)*(2*i+7)}`;
+        ctx.fillText(botText, dx + dominoW / 2, dy + (3 * dominoH) / 4 + 4);
+
+        // Cancellation arc or slashes
+        if (!isStartSurv && animProgress > 5) {
+          ctx.beginPath();
+          ctx.moveTo(dx + 10, dy + dominoH / 4 - 8);
+          ctx.lineTo(dx + dominoW - 10, dy + dominoH / 4 + 12);
+          ctx.strokeStyle = '#f43f5e';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+        if (!isEndSurv && animProgress > 5) {
+          ctx.beginPath();
+          ctx.moveTo(dx + 10, dy + (3 * dominoH) / 4 - 8);
+          ctx.lineTo(dx + dominoW - 10, dy + (3 * dominoH) / 4 + 12);
+          ctx.strokeStyle = '#f43f5e';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+
+        // Label term
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '10px Fredoka, sans-serif';
+        ctx.fillText(`r = ${p === 'ex36' ? i + 2 : i + 1}`, dx + dominoW / 2, dy + dominoH + 20);
+      }
+      ctx.textAlign = 'left';
+    }
+
+    // ==========================================
+    // TAB 3: INFINITY RUNWAY & CONVERGENCE
+    // ==========================================
+    const canvasInfinity = document.getElementById('canvas-infinity');
+    const sliderInfN = document.getElementById('slider-infinity-n');
+    const valInfN = document.getElementById('val-infinity-n');
+
+    sliderInfN.addEventListener('input', (e) => {
+      infState.n = parseInt(e.target.value);
+      valInfN.textContent = `n = ${infState.n}`;
+      updateInfinityDetails();
+      drawInfinityCanvas();
+    });
+
+    function setInfinityPreset(key) {
+      infState.preset = key;
+      document.querySelectorAll('.inf-pre-btn').forEach(b => {
+        b.className = 'inf-pre-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium transition';
+      });
+      const activeBtn = document.getElementById('btn-inf-' + key);
+      if (activeBtn) {
+        activeBtn.className = 'inf-pre-btn px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/50 font-medium transition';
+      }
+
+      updateInfinityDetails();
+      drawInfinityCanvas();
+    }
+
+    function warpToInfinity() {
+      infState.n = 100;
+      sliderInfN.value = 100;
+      valInfN.textContent = `n = 1000 (Warped!)`;
+      updateInfinityDetails();
+      drawInfinityCanvas();
+    }
+
+    /**
+     * STREAMING_CHUNK:Evaluating Tab 3 Infinity limits and residual errors
+     */
+    function evalPartialSum(preset, n) {
+      if (preset === 'unit') {
+        // S_n = 1 - 1/(n+1) -> 1
+        return { Sn: 1 - 1 / (n + 1), Sinf: 1, tail: 1 / (n + 1) };
+      } else if (preset === 'half') {
+        // S_n = 3/4 - 1/(2(n+1)) - 1/(2(n+2)) -> 0.75
+        const tail = 0.5 / (n + 1) + 0.5 / (n + 2);
+        return { Sn: 0.75 - tail, Sinf: 0.75, tail };
+      } else if (preset === 'past2009') {
+        // S_n = 1/15 - 1/((n+3)(2n+5)) -> 1/15 = 0.066667
+        const tail = 1 / ((n + 3) * (2 * n + 5));
+        return { Sn: 1 / 15 - tail, Sinf: 1 / 15, tail };
+      } else {
+        // Worked Ex 3.7: S_n = 5 - 5/n -> 5
+        const tail = 5 / n;
+        return { Sn: 5 - tail, Sinf: 5, tail };
+      }
+    }
+
+    function updateInfinityDetails() {
+      const n = infState.n;
+      const p = infState.preset;
+      const res = evalPartialSum(p, n);
+
+      document.getElementById('inf-sn-badge').textContent = `S_${n} = ${res.Sn.toFixed(4)}`;
+      document.getElementById('inf-target-badge').textContent = `S_∞ = ${res.Sinf.toFixed(4)}`;
+      document.getElementById('inf-gap-badge').textContent = `${res.tail.toFixed(5)}`;
+
+      const box = document.getElementById('inf-limits-box');
+      if (box) {
+        box.innerHTML = `
+          <div>1. Partial sum expression: $S_n = ${res.Sinf.toFixed(3)} - \\text{Tail}(n)$</div>
+          <div>2. Current residual error at $n=${n}$: $\\mathbf{${res.tail.toFixed(6)}}$</div>
+          <div>3. Taking the limit: $\\lim_{n \\to \\infty} \\text{Tail}(n) = 0$</div>
+          <div>4. Exact infinite convergence: $\\mathbf{S_\\infty = ${res.Sinf.toFixed(4)}}$</div>
+          <div class="p-2 rounded bg-amber-950/40 border border-amber-500/30 text-amber-200 mt-2">
+            💡 <strong>Cambridge Examination Requirement:</strong> Always state explicitly: <em>"Since $\\frac{1}{n+k} \\to 0$ as $n \\to \\infty$, the series converges to $S_\\infty$."</em>
+          </div>
+        `;
+        renderMath(box);
+      }
+    }
+
+    /**
+     * STREAMING_CHUNK:Drawing Tab 3 Infinity Canvas with convergence curve and asymptote
+     */
+    function drawInfinityCanvas() {
+      if (!canvasInfinity) return;
+      const { ctx, width, height } = setupHiDPICanvas(canvasInfinity);
+      if (!ctx) return;
+      const originX = 60;
+      const originY = height - 50;
+      const plotW = width - 100;
+      const plotH = height - 100;
+      const p = infState.preset;
+      const activeN = infState.n;
+
+      ctx.clearRect(0, 0, width, height);
+
+      const curVal = evalPartialSum(p, activeN);
+      const sInf = curVal.Sinf;
+
+      // Coordinate axes
+      ctx.beginPath();
+      ctx.moveTo(originX, originY);
+      ctx.lineTo(originX + plotW, originY);
+      ctx.moveTo(originX, originY);
+      ctx.lineTo(originX, originY - plotH);
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.4)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Draw Horizontal Asymptote S_infinity (Amber Dashed)
+      const asymY = originY - (plotH * 0.8);
+      ctx.beginPath();
+      ctx.moveTo(originX, asymY);
+      ctx.lineTo(originX + plotW, asymY);
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 6]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = '#f59e0b';
+      ctx.font = 'bold 12px Fira Code, monospace';
+      ctx.fillText(`Horizontal Limit S_∞ = ${sInf.toFixed(3)}`, originX + plotW - 190, asymY - 8);
+
+      // Plot partial sums trajectory S_1 to S_50
+      ctx.beginPath();
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2.5;
+
+      for (let k = 1; k <= 50; k++) {
+        const val = evalPartialSum(p, k);
+        const px = originX + (k / 50) * plotW;
+        const py = originY - (val.Sn / sInf) * (plotH * 0.8);
+        if (k === 1) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+
+      // Plot active point
+      const activeClamped = Math.min(50, activeN);
+      const activePx = originX + (activeClamped / 50) * plotW;
+      const activePy = originY - (curVal.Sn / sInf) * (plotH * 0.8);
+
+      // Residual gap bracket (Red)
+      ctx.beginPath();
+      ctx.moveTo(activePx, activePy);
+      ctx.lineTo(activePx, asymY);
+      ctx.strokeStyle = '#f43f5e';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.fillStyle = '#f43f5e';
+      ctx.font = '10px monospace';
+      ctx.fillText(`Gap: ${curVal.tail.toFixed(4)}`, activePx + 6, (activePy + asymY) / 2);
+
+      // Point Halo
+      ctx.beginPath();
+      ctx.arc(activePx, activePy, 7, 0, 2 * Math.PI);
+      ctx.fillStyle = '#38bdf8';
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 10;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 11px Fredoka, sans-serif';
+      ctx.fillText(`S_${activeN} = ${curVal.Sn.toFixed(3)}`, activePx - 25, activePy + 20);
+    }
+
+    // ==========================================
+    // TAB 4: CHALLENGES & QUIZ
+    // ==========================================
+    function loadChallengePreset(key) {
+      if (key === 'june2011') {
+        switchTab('tab-powers');
+        setPowerType('linear');
+      } else if (key === 'june2009') {
+        switchTab('tab-differences');
+        setDiffPreset('june2009');
+      } else if (key === 'june2013') {
+        switchTab('tab-infinity');
+        setInfinityPreset('unit');
+      }
+    }
+
+    function checkQuiz(qNum, choice) {
+      const feedback = document.getElementById(`q${qNum}-feedback`);
+      feedback.classList.remove('hidden', 'bg-emerald-500/20', 'text-emerald-300', 'border-emerald-500/40', 'bg-rose-500/20', 'text-rose-300', 'border-rose-500/40');
+
+      if (qNum === 1) {
+        if (choice === 'A') {
+          feedback.classList.add('bg-emerald-500/20', 'text-emerald-300', 'border', 'border-emerald-500/40');
+          feedback.innerHTML = '🎉 <strong>Spot on!</strong> The difference between indices $r$ and $r+2$ is $2$. In the telescoping process, term $r=1$ needs term $r=3$ to cancel it, so terms $r=1$ and $r=2$ remain uncancelled at the start, and terms $n-1$ and $n$ remain uncancelled at the end!';
+        } else {
+          feedback.classList.add('bg-rose-500/20', 'text-rose-300', 'border', 'border-rose-500/40');
+          feedback.innerHTML = '❌ <strong>Careful!</strong> Look at the denominator: the factors are $r$ and $r+2$. The gap is $2$, which means the cancellation skips a term, leaving TWO survivors at each boundary!';
+        }
+      } else if (qNum === 2) {
+        if (choice === 'B') {
+          feedback.classList.add('bg-emerald-500/20', 'text-emerald-300', 'border', 'border-emerald-500/40');
+          feedback.innerHTML = '🎉 <strong>Brilliant observation!</strong> To sum from $r=11$ to $25$, you take the sum of the first 25 terms and subtract the sum of the first 10 terms ($S_{25} - S_{10}$). If you subtracted $S_{11}$, you would accidentally delete term 11!';
+        } else {
+          feedback.classList.add('bg-rose-500/20', 'text-rose-300', 'border', 'border-rose-500/40');
+          feedback.innerHTML = '❌ <strong>Classic exam pitfall!</strong> $\\sum_{r=a}^b f(r) = S_b - S_{a-1}$. If you subtract $S_{11}$, you are subtracting the $r=11$ term that you wanted to keep!';
+        }
+      }
+      renderMath(feedback);
+    }
+
+    // Window Resize & Initialization
+    window.addEventListener('resize', () => {
+      if (currentTab === 'tab-powers') drawPowersCanvas();
+      if (currentTab === 'tab-differences') drawDominoesCanvas();
+      if (currentTab === 'tab-infinity') drawInfinityCanvas();
+    });
+
+    window.onload = function() {
+      setAppMode('eli6');
+      setPowerType('linear');
+      setDiffPreset('step1');
+      setInfinityPreset('unit');
+      renderMath(document.body);
+    };
+  </script>
+</body>
+</html>

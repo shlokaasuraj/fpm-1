@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cambridge 9231 FP1: Interactive Mathematics Portal</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- KaTeX for formula previews -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .math-font { font-family: 'Fira Code', monospace; }
+    .display-font { font-family: 'Fredoka', cursive, sans-serif; }
+    .hero-bg {
+      background: radial-gradient(circle at 50% 20%, #1e1538 0%, #090614 70%, #030208 100%);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- Header -->
+  <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-400 flex items-center justify-center shadow-lg shadow-indigo-500/20 font-black text-white text-lg">
+          9231
+        </div>
+        <div>
+          <h1 class="text-base font-bold text-white tracking-wide">Cambridge International FP1</h1>
+          <p class="text-xs text-slate-400">Further Pure Mathematics 1 Interactive Laboratory Suite</p>
+        </div>
+      </div>
+
+      <!-- Quick Search / Filter Bar -->
+      <div class="flex items-center gap-3">
+        <div class="relative">
+          <input 
+            type="text" 
+            id="searchInput" 
+            oninput="filterModules()" 
+            placeholder="Search topic, formula, or unit..." 
+            class="bg-slate-900 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 w-48 sm:w-64 outline-none transition"
+          >
+          <span class="absolute right-2.5 top-2 text-slate-500 text-xs">🔍</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main class="flex-1 hero-bg">
+    <div class="max-w-7xl mx-auto px-4 py-10 flex flex-col items-center text-center">
+      <span class="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 font-semibold text-xs tracking-wider uppercase mb-3">
+        Complete Syllabus Curriculum
+      </span>
+      <h2 class="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-slate-100 via-indigo-200 to-slate-400 bg-clip-text text-transparent max-w-2xl leading-tight mb-3">
+        Interactive Explorers & Visual Simulators
+      </h2>
+      <p class="text-sm text-slate-400 max-w-xl mb-8">
+        Self-contained visual simulators covering all core modules of Cambridge 9231 Paper 1. Choose a unit below to launch its intuitive visual sandbox, formula inspector, and exam challenge bank.
+      </p>
+
+      <!-- Module Grid -->
+      <div id="moduleGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full text-left">
+
+        <!-- 1. Roots of Polynomials -->
+        <a href="Roots-of-Polynomials.html" class="module-card group bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-indigo-500/60 rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10 flex flex-col justify-between" data-tags="roots polynomials vieta newton recurrence cubic quartic coefficients">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-2xl p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 group-hover:scale-110 transition duration-300">
+                $\Sigma$
+              </span>
+              <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Unit 1</span>
+            </div>
+            <h3 class="text-lg font-bold text-slate-100 group-hover:text-indigo-300 transition">Roots of Polynomials</h3>
+            <p class="text-xs text-slate-400 mt-2 mb-4 leading-relaxed">
+              Vieta's relations, Newton's power sum recurrence ($S_n$), dynamic root sliding on Cartesian planes, and substitutions.
+            </p>
+            <div class="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800 text-xs math-font text-indigo-300 mb-4">
+              $S_n = \sum \alpha^n, \quad aS_n + bS_{n-1} + cS_{n-2} = 0$
+            </div>
+          </div>
+          <div class="flex items-center text-xs font-semibold text-indigo-400 group-hover:translate-x-1 transition">
+            Launch Simulator →
+          </div>
+        </a>
+
+        <!-- 2. Rational Functions -->
+        <a href="Rational-Functions.html" class="module-card group bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-sky-500/60 rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-sky-500/10 flex flex-col justify-between" data-tags="rational functions asymptotes oblique discriminant turning points modulus transformations">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-2xl p-2.5 rounded-xl bg-sky-500/10 border border-sky-500/20 group-hover:scale-110 transition duration-300">
+                $\frac{P}{Q}$
+              </span>
+              <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Unit 2</span>
+            </div>
+            <h3 class="text-lg font-bold text-slate-100 group-hover:text-sky-300 transition">Rational Functions</h3>
+            <p class="text-xs text-slate-400 mt-2 mb-4 leading-relaxed">
+              Vertical and oblique slant asymptotes, discriminant restriction bands ($\Delta < 0$), and non-calculus range analysis.
+            </p>
+            <div class="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800 text-xs math-font text-sky-300 mb-4">
+              $y = Ax + B + \frac{R}{Q(x)}, \quad B(y)^2 - 4A(y)C(y) \ge 0$
+            </div>
+          </div>
+          <div class="flex items-center text-xs font-semibold text-sky-400 group-hover:translate-x-1 transition">
+            Launch Simulator →
+          </div>
+        </a>
+
+        <!-- 3. Summation of Series -->
+        <a href="Summation-Of-Series.html" class="module-card group bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-fuchsia-500/60 rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-fuchsia-500/10 flex flex-col justify-between" data-tags="summation series telescoping method of differences powers r2 r3 infinity convergence">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-2xl p-2.5 rounded-xl bg-fuchsia-500/10 border border-fuchsia-500/20 group-hover:scale-110 transition duration-300">
+                $\sum r^k$
+              </span>
+              <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Unit 3</span>
+            </div>
+            <h3 class="text-lg font-bold text-slate-100 group-hover:text-fuchsia-300 transition">Summation of Series</h3>
+            <p class="text-xs text-slate-400 mt-2 mb-4 leading-relaxed">
+              Standard power sum formulas ($\sum r, \sum r^2, \sum r^3$), telescoping method of differences domino cancellations, and infinite sums ($S_\infty$).
+            </p>
+            <div class="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800 text-xs math-font text-fuchsia-300 mb-4">
+              $\sum_{r=1}^n \frac{1}{r(r+1)} = 1 - \frac{1}{n+1} \implies S_\infty = 1$
+            </div>
+          </div>
+          <div class="flex items-center text-xs font-semibold text-fuchsia-400 group-hover:translate-x-1 transition">
+            Launch Simulator →
+          </div>
+        </a>
+
+        <!-- 4. Matrices & Transformations -->
+        <a href="Matrices.html" class="module-card group bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-violet-500/60 rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-violet-500/10 flex flex-col justify-between" data-tags="matrices transformations invariant lines determinant inverse gauss jordan 3d rotations">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-xl p-2.5 rounded-xl bg-violet-500/10 border border-violet-500/20 group-hover:scale-110 transition duration-300 font-mono">
+                $[M]$
+              </span>
+              <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Unit 4</span>
+            </div>
+            <h3 class="text-lg font-bold text-slate-100 group-hover:text-violet-300 transition">Matrices</h3>
+            <p class="text-xs text-slate-400 mt-2 mb-4 leading-relaxed">
+              2D rubber-sheet plane morphing, invariant lines ($y=mx$), 3D coordinate space rotations, area scaling by $\det(M)$, and augmented inversion.
+            </p>
+            <div class="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800 text-xs math-font text-violet-300 mb-4">
+              $M\begin{pmatrix} t \\ mt \end{pmatrix} = \begin{pmatrix} T \\ mT \end{pmatrix}, \quad (AB)^{-1} = B^{-1}A^{-1}$
+            </div>
+          </div>
+          <div class="flex items-center text-xs font-semibold text-violet-400 group-hover:translate-x-1 transition">
+            Launch Simulator →
+          </div>
+        </a>
+
+        <!-- 5. Polar Coordinates -->
+        <a href="Polar-Coordinates.html" class="module-card group bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-emerald-500/60 rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/10 flex flex-col justify-between" data-tags="polar coordinates cardioid roses spirals calculus area sectors tangents">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-2xl p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 group-hover:scale-110 transition duration-300">
+                🧭
+              </span>
+              <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Unit 5</span>
+            </div>
+            <h3 class="text-lg font-bold text-slate-100 group-hover:text-emerald-300 transition">Polar Coordinates</h3>
+            <p class="text-xs text-slate-400 mt-2 mb-4 leading-relaxed">
+              Flashlight beam radar mapping, cardioid & rose petal curves, Riemann pizza slice sector integration, and extreme points ($dr/d\theta = 0$ vs $dy/d\theta = 0$).
+            </p>
+            <div class="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800 text-xs math-font text-emerald-300 mb-4">
+              $A = \frac{1}{2}\int_\alpha^\beta r^2 \, d\theta, \quad x = r\cos\theta, \; y = r\sin\theta$
+            </div>
+          </div>
+          <div class="flex items-center text-xs font-semibold text-emerald-400 group-hover:translate-x-1 transition">
+            Launch Simulator →
+          </div>
+        </a>
+
+        <!-- 6. Vectors in 3D -->
+        <a href="Vectors.html" class="module-card group bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-cyan-500/60 rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-cyan-500/10 flex flex-col justify-between" data-tags="vectors cross product 3d skew lines shortest distance planes intersection angle tetrahedron">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-2xl p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 group-hover:scale-110 transition duration-300">
+                ⚔️
+              </span>
+              <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Unit 6</span>
+            </div>
+            <h3 class="text-lg font-bold text-slate-100 group-hover:text-cyan-300 transition">Vectors in 3D</h3>
+            <p class="text-xs text-slate-400 mt-2 mb-4 leading-relaxed">
+              Cross products ($\mathbf{a} \times \mathbf{b}$), shortest perpendicular distance between skew lines, plane intersections, and scalar triple product volumes.
+            </p>
+            <div class="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800 text-xs math-font text-cyan-300 mb-4">
+              $d = \frac{|(\mathbf{a}_2 - \mathbf{a}_1)\cdot(\mathbf{b}_1 \times \mathbf{b}_2)|}{|\mathbf{b}_1 \times \mathbf{b}_2|}, \quad V = \frac{1}{6}|(\mathbf{a}\times\mathbf{b})\cdot\mathbf{c}|$
+            </div>
+          </div>
+          <div class="flex items-center text-xs font-semibold text-cyan-400 group-hover:translate-x-1 transition">
+            Launch Simulator →
+          </div>
+        </a>
+
+        <!-- 7. Proof by Induction -->
+        <a href="Proof_By_Induction.html" class="module-card group bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-orange-500/60 rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/10 flex flex-col justify-between" data-tags="proof mathematical induction domino base case divisibility recurrence matrices derivatives">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-2xl p-2.5 rounded-xl bg-orange-500/10 border border-orange-500/20 group-hover:scale-110 transition duration-300">
+                🪜
+              </span>
+              <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Unit 7</span>
+            </div>
+            <h3 class="text-lg font-bold text-slate-100 group-hover:text-orange-300 transition">Proof by Induction</h3>
+            <p class="text-xs text-slate-400 mt-2 mb-4 leading-relaxed">
+              The Domino Ladder engine ($P_1 \land [P_k \Rightarrow P_{k+1}]$), divisibility wheel proofs, higher-order derivatives ($2n$-th steps), and recurrence sequence limits.
+            </p>
+            <div class="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800 text-xs math-font text-orange-300 mb-4">
+              $f(k+1) - f(k) = d \cdot M \implies P_k \Rightarrow P_{k+1}$
+            </div>
+          </div>
+          <div class="flex items-center text-xs font-semibold text-orange-400 group-hover:translate-x-1 transition">
+            Launch Simulator →
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-500">
+    Designed for Cambridge International AS & A Level Further Mathematics 9231 (Paper 1: Further Pure Mathematics 1)
+  </footer>
+
+  <script>
+    function filterModules() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      const cards = document.querySelectorAll('.module-card');
+      cards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        const tags = card.getAttribute('data-tags') || '';
+        if (text.includes(q) || tags.includes(q)) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    }
+
+    window.onload = function() {
+      if (window.renderMathInElement) {
+        renderMathInElement(document.body, {
+          delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false}
+          ],
+          throwOnError: false
+        });
+      }
+    };
+  </script>
+</body>
+</html>
