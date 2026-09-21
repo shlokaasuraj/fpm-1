@@ -1393,5 +1393,85 @@
       renderMath(document.body);
     };
   </script>
+  <!-- Robust Global Logo & Home Link Injector -->
+<script>
+(function() {
+  const LOGO_SRC = 'logo.png';
+  const isIndex = window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/') || window.location.pathname === '';
+
+  function applyLogo() {
+    // 1. Favicon Injection
+    let fav = document.querySelector("link[rel~='icon']");
+    if (!fav) {
+      fav = document.createElement('link');
+      fav.rel = 'icon';
+      document.head.appendChild(fav);
+    }
+    fav.href = LOGO_SRC;
+
+    // 2. Identify Target in Vectors.html vs Tailwind Pages
+    const brandIcon = document.querySelector('.brand .brand-icon'); // Vectors.html
+    const tailwindIcon = document.querySelector('header .w-10.h-10'); // All other pages
+
+    const target = brandIcon || tailwindIcon;
+    if (!target) return;
+
+    // Avoid infinite replacement loops
+    if (target.getAttribute('data-logo-applied') === 'true' || target.parentElement?.getAttribute('data-logo-applied') === 'true') {
+      return;
+    }
+
+    // Build replacement element
+    const container = document.createElement(isIndex ? 'div' : 'a');
+    if (!isIndex) {
+      container.href = 'index.html';
+      container.title = 'Return to Portal Home';
+    }
+
+    container.setAttribute('data-logo-applied', 'true');
+    container.style.display = 'inline-flex';
+    container.style.alignItems = 'center';
+    container.style.justifyContent = 'center';
+    container.style.width = '42px';
+    container.style.height = '42px';
+    container.style.minWidth = '42px';
+    container.style.borderRadius = '12px';
+    container.style.background = 'rgba(255, 255, 255, 0.06)';
+    container.style.border = '1px solid rgba(255, 255, 255, 0.15)';
+    container.style.padding = '3px';
+    container.style.overflow = 'hidden';
+    container.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+    container.style.transition = 'transform 0.2s ease';
+    container.style.cursor = isIndex ? 'default' : 'pointer';
+
+    container.onmouseenter = () => { if (!isIndex) container.style.transform = 'scale(1.08)'; };
+    container.onmouseleave = () => { if (!isIndex) container.style.transform = 'scale(1)'; };
+
+    const img = document.createElement('img');
+    img.src = LOGO_SRC;
+    img.alt = 'Logo';
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.objectFit = 'contain';
+    img.style.display = 'block';
+
+    container.appendChild(img);
+    target.replaceWith(container);
+  }
+
+  // Run at all lifecycle stages to survive KaTeX re-renders
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applyLogo);
+  } else {
+    applyLogo();
+  }
+
+  window.addEventListener('load', () => {
+    applyLogo();
+    // Safety delay for async renderMath(document.body) calls
+    setTimeout(applyLogo, 250);
+  });
+})();
+</script>
 </body>
 </html>
